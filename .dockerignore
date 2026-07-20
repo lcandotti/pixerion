@@ -1,0 +1,13 @@
+# Keep the build context small and reproducible: never ship local build output,
+# caches, VCS, or IDE files into the image build (the Dockerfile builds from source).
+.git
+.gitignore
+.gradle
+**/build
+build
+.idea
+*.iml
+.kotlin
+# Docs/CI are not needed to build the server jar.
+docs
+.github

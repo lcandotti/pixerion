@@ -1,0 +1,68 @@
+# Pixerion server — health & authentication
+#
+# Select the "dev" environment (top-right run-config dropdown in IntelliJ, or
+# `--env dev` with the ijhttp CLI), then run top to bottom:
+#   Health  →  Login (captures {{authToken}})  →  Who am I
+# The "Login" request stores the JWT in a global, so the protected requests here
+# and in catalog.http can reuse it via `Authorization: Bearer {{authToken}}`.
+
+### Health check (public — no token required)
+GET {{baseUrl}}/actuator/health
+Accept: application/json
+
+> {%
+    client.test("health is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("status is UP", () => client.assert(response.body.status === "UP", "expected UP"));
+%}
+
+### Login as admin — captures the JWT into the global {{authToken}}
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("login is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("token present", () => client.assert(response.body.token !== undefined, "no token in response"));
+    client.global.set("authToken", response.body.token);
+    client.log("Captured authToken (expires in " + response.body.expiresInSeconds + "s)");
+%}
+
+### Who am I — requires a valid bearer token
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+> {%
+    client.test("me is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("username present", () => client.assert(response.body.username !== undefined, "no username"));
+    // NOTE: /auth/me returns ROLE_-prefixed authorities (e.g. "ROLE_ADMIN"),
+    // unlike the JWT "roles" claim which stores them un-prefixed ("ADMIN").
+    client.test("has ROLE_ADMIN", () => client.assert(response.body.roles.indexOf("ROLE_ADMIN") >= 0, "expected ROLE_ADMIN"));
+    client.log("Authenticated as " + response.body.username + " " + JSON.stringify(response.body.roles));
+%}
+
+### [negative] Login with a wrong password → 401
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "definitely-wrong"
+}
+
+> {%
+    client.test("bad creds is 401", () => client.assert(response.status === 401, "expected 401"));
+    client.test("error message", () => client.assert(response.body.error === "invalid credentials", "unexpected error body"));
+%}
+
+### [negative] /auth/me without a token → 401
+GET {{baseUrl}}/auth/me
+Accept: application/json
+
+> {%
+    client.test("no token is 401", () => client.assert(response.status === 401, "expected 401"));
+%}

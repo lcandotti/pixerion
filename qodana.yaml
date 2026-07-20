@@ -1,0 +1,28 @@
+####################################################################################################################
+# WARNING: Do not store sensitive information in this file, as its contents will be included in the Qodana report. #
+####################################################################################################################
+
+version: "1.0"
+linter: qodana-jvm
+profile:
+  name: qodana.recommended
+include:
+  - name: CheckDependencyLicenses
+# The LGPL-3.0-only and LGPL-3.0-or-later license *texts* are identical (the choice is
+# made in per-file headers, which we don't use), so Qodana may detect the project license
+# under either SPDX key — the rule must list both or it silently never applies.
+licenseRules:
+  - keys:
+      - "LGPL-3.0-only"
+      - "LGPL-3.0-or-later"
+    allowed:
+      - "Apache-2.0"
+# Feed JaCoCo coverage into Qodana. The CI workflow runs `./gradlew test` first, which
+# leaves each module's report at build/reports/jacoco/test/jacocoTestReport.xml; Qodana
+# reads coverage from .qodana/code-coverage, so stage the XMLs there before the analysis.
+# The `|| true` on the last copy is defensive (a partial build may not emit every report).
+bootstrap: >-
+  mkdir -p .qodana/code-coverage;
+  cp pixerion-core/build/reports/jacoco/test/jacocoTestReport.xml .qodana/code-coverage/pixerion-core.xml;
+  cp pixerion-cli/build/reports/jacoco/test/jacocoTestReport.xml .qodana/code-coverage/pixerion-cli.xml;
+  cp pixerion-server/build/reports/jacoco/test/jacocoTestReport.xml .qodana/code-coverage/pixerion-server.xml 2>/dev/null || true

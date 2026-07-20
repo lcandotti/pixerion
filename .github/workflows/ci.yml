@@ -1,0 +1,179 @@
+name: CI
+
+# Build pipeline:
+#   * Lint + tests run on every PR to main/develop (open/update/ready) AND again
+#     when the PR is merged.
+#   * The two artifacts (runnable JVM distribution + Linux native executable) are
+#     built ONLY when a PR is merged into main/develop — i.e. on the resulting
+#     `push` to those branches — and uploaded with a 7-day retention.
+#
+# `develop` doesn't exist yet; listing it here is a no-op until it does.
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [ opened, reopened, synchronize, ready_for_review ]
+  push:
+    # A merged PR lands as a push to its base branch. Branch protection on
+    # main/develop is what makes "push here" mean "a PR was merged".
+    branches: [ main, develop ]
+  # Manual run of the quality gate (artifacts stay gated to merges — see below).
+  workflow_dispatch:
+
+# A newer event on the same PR/branch cancels the in-flight run — but never
+# cancel a merge build on main/develop, so artifacts always finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Quality gate: linter first, then tests. Both artifact jobs depend on this,
+  # so nothing is published unless lint and tests pass.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # ktlint runs before the tests (separate steps => ordered; a lint failure
+      # short-circuits the job before tests run).
+      - name: Lint (ktlint)
+        run: ./gradlew ktlintCheck
+
+      - name: Test
+        run: ./gradlew test
+
+      # Test reports are handy on failures; kept for the same 7 days as the build
+      # artifacts. `always()` so they upload even when a test fails.
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Artifact 1 — runnable JVM distribution (bin/pixerion + bundled jars).
+  # Needs a JDK to run, but no GraalVM. Portable across OSes.
+  # ---------------------------------------------------------------------------
+  distribution:
+    name: Runnable distribution
+    needs: verify
+    # Only when a PR is merged into main/develop (i.e. a push to those branches),
+    # never on the PR itself.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build runnable distribution
+        run: ./gradlew :pixerion-cli:distZip
+
+      - name: Upload runnable distribution
+        uses: actions/upload-artifact@v7
+        with:
+          name: pixerion-distribution
+          path: pixerion-cli/build/distributions/pixerion-*.zip
+          retention-days: 7
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Artifact 2 — GraalVM native executables, one per OS. Built with a *real*
+  # GraalVM (via setup-graalvm) to avoid the broken native-image symlink the
+  # Foojay auto-provisioned toolchain ships (see README / ADR notes).
+  #
+  # Native images can't cross-compile, so each platform builds on its own runner:
+  #   linux-x86_64  (ubuntu) · macos-arm64 (Apple Silicon) · windows-x86_64.
+  # The Windows binary is `pixerion.exe`; the others are `pixerion`.
+  # ---------------------------------------------------------------------------
+  native:
+    name: Native executable (${{ matrix.label }})
+    needs: verify
+    # Merge into main/develop only (same gate as the distribution artifact).
+    if: github.event_name == 'push'
+    runs-on: ${{ matrix.os }}
+    # This job runs `./gradlew` under `shell: bash` (Git Bash on Windows), whose
+    # home resolution differs from the Node-based setup-gradle action. Left to the
+    # default, the action manages a Gradle User Home the build never writes to
+    # (e.g. D:\a\.gradle on Windows) and its post-job cache save fails with
+    # "Path(s) ... do not exist". Pinning one explicit home makes the action's
+    # cache restore/save and the build agree. Works on all three matrix OSes.
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
+    strategy:
+      # Don't let one OS failing cancel the other platforms' builds.
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            binary: pixerion
+          - os: macos-latest
+            label: macos-arm64
+            binary: pixerion
+          - os: windows-latest
+            label: windows-x86_64
+            binary: pixerion.exe
+    defaults:
+      run:
+        # Use bash everywhere so `./gradlew` works uniformly (Git Bash on Windows).
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      # Provides a GraalVM 25 JDK with `native-image` on PATH and as the active
+      # toolchain (vendor=GRAAL_VM, languageVersion=25 — see pixerion-cli/build.gradle.kts).
+      # On Windows the native-build-tools plugin autoconfigures the MSVC toolchain.
+      - name: Set up GraalVM 25
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '25'
+          distribution: graalvm
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # native-image links against the C toolchain and zlib. macOS (clang/zlib)
+      # and Windows (MSVC) already have what they need on the runner image.
+      - name: Install native-image build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential zlib1g-dev
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # Uses the GraalVM that setup-graalvm installed (via GRAALVM_HOME) — see
+      # pixerion-cli/build.gradle.kts, which disables Gradle toolchain detection when
+      # GRAALVM_HOME is set so the broken Foojay-provisioned native-image is avoided.
+      - name: Native compile
+        run: ./gradlew :pixerion-cli:nativeCompile
+
+      - name: Upload native executable
+        uses: actions/upload-artifact@v7
+        with:
+          name: pixerion-native-${{ matrix.label }}
+          path: pixerion-cli/build/native/nativeCompile/${{ matrix.binary }}
+          retention-days: 7
+          if-no-files-found: error

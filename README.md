@@ -1,0 +1,209 @@
+# Pixerion
+
+A tool for querying book catalogs from multiple sources behind a single,
+provider-agnostic interface — with a native-image **CLI** and a JWT-secured
+**REST server**, both built on one reusable core.
+
+[![CI](https://github.com/lcandotti/pixerion/actions/workflows/ci.yml/badge.svg)](https://github.com/lcandotti/pixerion/actions/workflows/ci.yml)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](LICENSE)
+
+## Overview
+
+Pixerion adapts different book sources (starting with [MangaDex](https://mangadex.org))
+to one `Catalog` contract, so callers depend only on domain types and never on a
+specific provider. The reusable logic — the contract, source adapters, a parallel
+streaming downloader, and a `.cbz` bundler — lives in a single publishable library
+(`core`); a thin **CLI** and a thin **server** are just two front-ends over it.
+
+## Features
+
+- **Provider-agnostic catalog** — search, look up, and download books through one
+  interface; sources are pluggable adapters.
+- **Streaming parallel downloads** — pages stream lazily and are written by a
+  bounded worker pool, so large books don't materialize in memory.
+- **`.cbz` bundling** — package a downloaded book into per-chapter comic archives
+  (with `ComicInfo.xml`) for readers like Panel, Komga, Kavita, or Mihon.
+- **Native CLI** — builds to a standalone GraalVM native binary (no JVM needed at
+  runtime).
+- **Secured REST API** — the same capability over HTTP, with stateless JWT auth and
+  role-based access control.
+
+## Requirements
+
+- **JDK 25** (the build provisions a toolchain via Gradle if needed).
+- **GraalVM** — only for building the native CLI binary (optional; see
+  [Native binary](#native-binary)).
+- **Docker** — only for running the server with its PostgreSQL database via Compose
+  (optional; the CLI needs neither).
+
+Everything is driven through the [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)
+(`./gradlew`), so no local Gradle install is required.
+
+## Quick start
+
+```sh
+git clone https://github.com/lcandotti/pixerion.git
+cd pixerion
+./gradlew build                                   # compile + run all checks
+./gradlew :pixerion-cli:run --args="search berserk"
+```
+
+## CLI usage
+
+```
+pixerion search   [--source <s>] <query>                     # search a catalog by title
+pixerion find     [--source <s>] <ref>                       # fetch a single book by reference
+pixerion download [--source <s>] [-o <dir>] [-w <n>] <ref>   # download a book to disk
+pixerion bundle   [-o <dir>] [--overwrite] <book-dir>        # package a download into .cbz archives
+```
+
+- `--source` selects the catalog (default: `mangadex`).
+- A `find`/`download` **reference** is either a bare source id (scoped to
+  `--source`) or an explicit `scheme:id` pair, e.g.
+  `mangadex:801513ba-a712-498c-8f57-cae55b38cc92`.
+- **Exit codes:** `0` success, `1` no result (e.g. a `find` miss), `2` usage error
+  or failure (unreachable source, I/O error).
+
+Run it on the JVM with the `application` plugin, passing args via `--args`:
+
+```sh
+./gradlew :pixerion-cli:run --args="find 801513ba-a712-498c-8f57-cae55b38cc92"
+```
+
+`download` saves a book's pages in parallel (`--workers`, default 4) under
+`~/.pixerion` by default — override with `--output <dir>`. Raw pages are laid out as
+`<root>/<source>/<book>/chapters/ch-<chapter>/<NNN>.<ext>`; the `chapters/` layer
+keeps images apart from sibling outputs like the bundler's `cbz/`.
+
+`bundle` packages a downloaded book — the book directory whose `chapters/` layer
+holds the `ch-<chapter>/` folders — into one `.cbz` (zipped images) per chapter. It is purely local (no catalog or network).
+Archives go to a `cbz/` subfolder by default so they never mix with the raw image
+dirs; existing archives are skipped unless `--overwrite` is given:
+
+```sh
+pixerion bundle ~/.pixerion/mangadex/Berserk
+# → ~/.pixerion/mangadex/Berserk/cbz/Berserk - ch-1.cbz, …
+```
+
+## Native binary
+
+The CLI builds to a standalone native binary via the
+[GraalVM Native Build Tools](https://graalvm.github.io/native-build-tools/).
+picocli's reachability metadata is generated at build time by `picocli-codegen`, and
+other dependencies' metadata (e.g. OkHttp's) comes from the GraalVM metadata
+repository — so no reflection config is hand-written.
+
+```sh
+./gradlew :pixerion-cli:nativeCompile
+# output: pixerion-cli/build/native/nativeCompile/pixerion
+./pixerion-cli/build/native/nativeCompile/pixerion search berserk
+```
+
+Building the image needs a GraalVM toolchain, and there are two environment gotchas
+(config-cache incompatibility and a broken auto-provisioned `native-image` symlink)
+that the build already handles — see
+[`ARCHITECTURE.md` §4.9](ARCHITECTURE.md#49-build-native-image--tooling) for the details.
+
+## Server
+
+The `server` module exposes the same catalog over HTTP (Spring MVC), secured with
+stateless JWT.
+
+```sh
+docker compose up --build                   # server + PostgreSQL together (port 8080)
+# or, for development: run only the database in Docker and the server on the host
+docker compose up postgres
+./gradlew :pixerion-server:bootRun          # port 8080; defaults point at localhost:5432
+```
+
+**Auth flow:** `POST /auth/login` with credentials returns a JWT; send it as
+`Authorization: Bearer <token>` on subsequent calls. The interactive docs at
+`/scalar` take the same token in their auth field to call the API directly.
+
+| Method & path | Auth | Description |
+|---|---|---|
+| `POST /auth/login` | public | Exchange credentials for a JWT. |
+| `GET /auth/me` | bearer | Report the current principal. |
+| `GET /api/search?q=…&source=…` | bearer | Search a catalog by title. |
+| `GET /api/books/{id}?source=…` | bearer | Fetch one book (404 if absent). |
+| `POST /api/downloads?id=…&source=…` | bearer, **ADMIN** | Start a background download job; returns `202 Accepted` + `{id, status, source}`. |
+| `GET /api/downloads/{id}` | bearer, **ADMIN** | A job's status and, once finished, its outcome (404 if unknown). |
+| `GET /api/downloads/{id}/events` | bearer, **ADMIN** | Live job progress as SSE: `state` snapshots, then a terminal `completed`/`error`. |
+| `GET /actuator/health` | public | Health probe (container healthcheck). |
+| `GET /v3/api-docs` | public | Generated OpenAPI 3 spec (also `/v3/api-docs.yaml`). |
+| `GET /scalar` | public | Interactive API reference (Scalar). |
+
+The catalog API lives under `/api` (ADR-0013): the server also serves the Angular
+SPA from the `webapp` module, and any GET outside the backend prefixes falls back
+to the SPA's `index.html` so client-side routes survive deep links and refreshes.
+
+The absence-vs-failure contract maps onto HTTP status: a missing book is `404`, a
+source-level failure is `502`, an unknown source is `400`.
+
+Downloads are **asynchronous** (ADR-0011): `POST /api/downloads` only starts the job —
+poll `GET /api/downloads/{id}` or stream `GET /api/downloads/{id}/events` for progress. A
+book that turns out not to exist surfaces as the job's terminal `NOT_FOUND` status,
+not a synchronous 404. The SSE endpoint authenticates via the normal `Authorization:
+Bearer` header, which the browser-native `EventSource` cannot send — use a
+fetch-based SSE client.
+
+### Web frontend (`webapp`)
+
+The server serves an Angular SPA from the same origin (one bootJar carries both —
+ADR-0013). The `pixerion-webapp` module holds the Angular app and its Gradle↔npm
+bridge: `:pixerion-server:bootJar` / `bootRun` embed the compiled bundle
+automatically (building it with a pinned, auto-downloaded Node), and server tests
+never trigger the npm build.
+
+Day-to-day frontend development bypasses Gradle entirely — the hot-reload dev
+loops for both sides are described in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+### Server configuration
+
+All settings are environment-overridable; the defaults are for **local use only**
+and must be overridden in production.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `APP_JWT_SECRET` | `dev-secret-…` (≥ 32 bytes) | HS256 signing secret. |
+| `APP_JWT_TTL_SECONDS` | `3600` | Token lifetime. |
+| `APP_ADMIN_USERNAME` / `APP_ADMIN_PASSWORD` | `admin` / `admin` | Initial admin, seeded on first start. |
+| `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | — | PostgreSQL connection. |
+
+## Architecture
+
+`Catalog` (in `core`, package `io.modernia.pixerion.domain`) is the provider-agnostic
+port: callers depend only on domain types (`Book`, `BookId`, `SourceRef`) and cannot
+tell where the data originates. Source adapters implement it; the first is
+**`MangaDexCatalog`**, whose HTTP/JSON transport is isolated in `MangaDexClient`.
+Source-level failures surface as `domain.CatalogException`, kept distinct from a
+genuinely absent book (a successful `null`/empty result).
+
+For the full module topology, data flow, contract invariants, and the **pitfalls**
+to watch when changing the code (the Java↔Kotlin interop seam, the rate-limit/retry
+path, the download concurrency model, the JWT/CSRF setup, and the build gotchas), see
+**[`ARCHITECTURE.md`](ARCHITECTURE.md)**. Architecturally significant decisions are
+recorded as ADRs in [`docs/adr/`](docs/adr/).
+
+| Module | Description |
+|--------|-------------|
+| `core` | Domain model, the `Catalog` contract, source adapters, the downloader, the cbz bundler, and the Java-interop facade. Coroutine-first. Published as `io.modernia.pixerion:pixerion-core`. |
+| `cli` | The picocli CLI. Wires commands to catalogs; ships as a native executable. Not published. |
+| `server` | A Java Spring Boot web front-end over `core` (via its blocking interop facade), secured with Spring Security + stateless JWT. Serves the API under `/api` and the `webapp` bundle everywhere else. Not published. |
+| `webapp` | The Angular SPA plus its Gradle↔npm bridge; `npm run build` output is packaged into a jar the server embeds (ADR-0013). Not published. |
+
+## Contributing
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat:`, `fix:`, `chore:`, …), and `./gradlew build` must be green before opening
+a PR (it runs ktlint + all tests). Everything else a contributor needs — the
+development environment (Docker runs only the infrastructure; the code you're
+changing runs on your host), the backend/frontend dev loops, the build/test/lint
+commands, the project conventions, and the step-by-step guide to adding a new
+catalog source — lives in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## License
+
+Pixerion is licensed under the **GNU Lesser General Public License v3.0**
+(LGPL-3.0) — see [`LICENSE`](LICENSE). The LGPL lets the `pixerion-core` library be
+used by other software while keeping modifications to the library itself open.

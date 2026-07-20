@@ -1,0 +1,52 @@
+# Pixerion server — catalog endpoints
+#
+# These require a bearer token. Run auth.http → "Login as admin" first so that
+# {{authToken}} is populated (globals persist across files within one env run).
+# Select the "dev" environment. Run "Search" before "Fetch": it captures the
+# first result's id into {{bookId}} (which downloads.http also reuses).
+
+### Search a catalog by title (any authenticated user) — captures {{bookId}}
+GET {{baseUrl}}/api/search?q={{searchQuery}}&source={{source}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+> {%
+    client.test("search is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("array body", () => client.assert(Array.isArray(response.body), "expected a JSON array"));
+    if (Array.isArray(response.body) && response.body.length > 0) {
+        client.global.set("bookId", response.body[0].id);
+        client.log("Captured bookId=" + response.body[0].id + " (" + response.body[0].title + ")");
+    } else {
+        client.log("No results — set the 'bookId' global manually to run the next requests.");
+    }
+%}
+
+### Fetch a single book by id (any authenticated user) — 404 if absent
+GET {{baseUrl}}/api/books/{{bookId}}?source={{source}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+> {%
+    client.test("find is 200 or 404", () => client.assert(response.status === 200 || response.status === 404, "expected 200/404"));
+    if (response.status === 200) {
+        client.test("id echoed", () => client.assert(response.body.id !== undefined, "no id in body"));
+    }
+%}
+
+# The download lifecycle (start job → poll status → stream SSE progress) lives in
+# downloads.http — it grew into a background job spanning three endpoints.
+
+### [negative] Unknown source → 400
+GET {{baseUrl}}/api/search?q={{searchQuery}}&source=nope
+Authorization: Bearer {{authToken}}
+
+> {%
+    client.test("unknown source is 400", () => client.assert(response.status === 400, "expected 400"));
+%}
+
+### [negative] Protected endpoint without a token → 401
+GET {{baseUrl}}/api/search?q={{searchQuery}}
+
+> {%
+    client.test("no token is 401", () => client.assert(response.status === 401, "expected 401"));
+%}

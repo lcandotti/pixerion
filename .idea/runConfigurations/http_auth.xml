@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="http@auth" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" path="$PROJECT_DIR$/pixerion-server/http/auth.http" executionIdentifier="Health check (public — no token required)">
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,53 @@
+# Runs the Pixerion web backend (the :server module) with its PostgreSQL store.
+#
+#   docker compose up --build
+#   TOKEN=$(curl -s -XPOST localhost:8080/auth/login -H 'Content-Type: application/json' \
+#            -d '{"username":"admin","password":"admin"}' | sed 's/.*"token":"\([^"]*\)".*/\1/')
+#   curl -H "Authorization: Bearer $TOKEN" "http://localhost:8080/api/search?q=berserk"
+#
+# Build context is the repo root, so the multi-module Gradle build can see every
+# module; the Dockerfile lives in pixerion-server/.
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: pixerion
+      POSTGRES_USER: pixerion
+      POSTGRES_PASSWORD: pixerion
+    volumes:
+      - pixerion-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pixerion -d pixerion"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+      dockerfile: pixerion-server/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      # Persist downloads written by POST /api/downloads (the downloader's default
+      # root is ~/.pixerion, which is /home/app/.pixerion for the container user).
+      - pixerion-downloads:/home/app/.pixerion
+    healthcheck:
+      # Actuator exposes /actuator/health (public, even under security); -f makes curl
+      # exit non-zero on a non-2xx so Docker marks the container unhealthy.
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+volumes:
+  pixerion-downloads:
+  pixerion-pgdata:

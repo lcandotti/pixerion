@@ -1,0 +1,72 @@
+# Version catalog is a central place for you to declare and version dependencies
+# https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
+# https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
+
+[versions]
+kotlin = "2.4.0"
+kotlinxDatetime = "0.7.1"
+kotlinxSerializationJSON = "1.9.0"
+kotlinxCoroutines = "1.10.2"
+okhttp = "4.12.0"
+junit = "5.11.4"
+picocli = "4.7.6"
+graalvmNative = "0.10.6"
+ktlint = "14.2.0"
+springBoot = "4.1.0"
+springdoc = "3.0.3"
+# The Gradle↔npm bridge for the `pixerion-webapp` module (ADR-0013)…
+nodeGradle = "7.1.0"
+# …and the Node.js runtime it downloads to run `npm run build` (current LTS, "Krypton").
+nodejs = "24.18.0"
+
+[libraries]
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+# Applied by the kotlin-jvm convention plugin so every module is linted uniformly.
+ktlintGradlePlugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint" }
+kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
+kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocliCodegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+# Versions managed by the Spring Boot BOM (applied via platform() in the server module), so no version.ref here.
+springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
+springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+springBootStarterSecurity = { module = "org.springframework.boot:spring-boot-starter-security" }
+springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
+springBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+# Boot 4 split autoconfiguration into per-technology modules; Flyway's lives here.
+# Without it, flyway-core is on the classpath but never wired into the lifecycle.
+springBootFlyway = { module = "org.springframework.boot:spring-boot-flyway" }
+flywayCore = { module = "org.flywaydb:flyway-core" }
+flywayPostgresql = { module = "org.flywaydb:flyway-database-postgresql" }
+postgresql = { module = "org.postgresql:postgresql" }
+h2 = { module = "com.h2database:h2" }
+# OpenAPI generation (/v3/api-docs) + Scalar docs UI (/scalar) for the server (ADR-0012).
+# The 3.x line targets Boot 4 (2.x does not). Not in the Boot BOM, so it needs an explicit version.
+springdocOpenapiStarterWebmvcScalar = { module = "org.springdoc:springdoc-openapi-starter-webmvc-scalar", version.ref = "springdoc" }
+springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
+springSecurityTest = { module = "org.springframework.security:spring-security-test" }
+# Testcontainers (2.x artifact names; versions managed by the Boot BOM, which imports the
+# testcontainers-bom): a real PostgreSQL for the server's Flyway-vs-entities smoke test;
+# skipped gracefully when Docker is absent.
+springBootTestcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
+testcontainersPostgresql = { module = "org.testcontainers:testcontainers-postgresql" }
+testcontainersJunitJupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
+
+# Libraries can be bundled together for easier import
+[bundles]
+kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines"]
+
+[plugins]
+kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+graalvmNative = { id = "org.graalvm.buildtools.native", version.ref = "graalvmNative" }
+# Applied by the Java `:server` front-end (Spring MVC web backend over core). See ADR-0007.
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+# Applied by `:pixerion-webapp` to drive the Angular (npm) build from Gradle. See ADR-0013.
+nodeGradle = { id = "com.github.node-gradle.node", version.ref = "nodeGradle" }
