@@ -8,7 +8,7 @@ watch when changing the code — see [`ARCHITECTURE.md`](ARCHITECTURE.md).
 ## Prerequisites
 
 - **JDK 25** — the build provisions a matching toolchain via Gradle if needed.
-- **Docker** — runs the infrastructure the server depends on (PostgreSQL).
+- **Docker** — runs the infrastructure the web backend depends on (PostgreSQL).
 - **GraalVM** — only for building the native CLI binary (optional).
 - **Node** — not required: the `webapp` module's Gradle build auto-downloads a
   pinned Node. A local Node + Angular CLI is convenient for frontend work, but
@@ -22,22 +22,21 @@ Everything is driven through the [Gradle Wrapper](https://docs.gradle.org/curren
 The rule of thumb: **Docker runs only the services that are not this project** —
 today that's just PostgreSQL, and the same will hold for any infrastructure added
 later (a reverse proxy, a cache, …). The code you are actually changing runs on
-your host, where it can reload. The packaged server container
+your host, where it can reload. The packaged backend container
 (`docker compose up --build`) runs a bootJar and cannot pick up code changes —
 it's for verifying the final artifact, not for iterating.
 
-### Backend loop (server code)
+### Backend loop
 
 ```sh
 docker compose up postgres            # infrastructure only
-./gradlew :pixerion-server:bootRun    # the server on your host, port 8080
+./gradlew :pixerion-server:bootRun    # the backend on your host, port 8080
 ```
 
 No configuration needed: `application.properties` defaults already point at
-`localhost:5432` with the compose credentials (`pixerion`/`pixerion`), a dev JWT
-secret, and an `admin`/`admin` initial user. Restart `bootRun` to pick up a
-change. Don't run the compose `server` service at the same time — it also binds
-port 8080 (`docker compose stop server` if it's up).
+`localhost:5432` with the compose credentials (`pixerion`/`pixerion`). Restart
+`bootRun` to pick up a change. Don't run the compose `server` service at the
+same time — it also binds port 8080 (`docker compose stop server` if it's up).
 
 ### Frontend loop (webapp code)
 
@@ -51,7 +50,7 @@ Develop against `http://localhost:4200` — Angular's dev server live-reloads on
 every save, and [`proxy.conf.json`](pixerion-webapp/proxy.conf.json) forwards
 `/api`, `/auth`, `/actuator`, `/v3`, and `/scalar` to `localhost:8080`. Anything
 answering on 8080 works as the backend: `bootRun` (backend loop above), or the
-packaged container (`docker compose up`) when you're not touching server code.
+packaged container (`docker compose up`) when you're not touching backend code.
 The Gradle↔npm packaging is never part of this loop — the bundle is only built
 into the jar by `:pixerion-server:bootJar` / `bootRun`.
 
@@ -91,9 +90,7 @@ bash scripts/local/ci.sh tests                # test + coverage; prints report p
 Adapter tests drive a real `Catalog` against an in-process
 [`MockWebServer`](https://github.com/square/okhttp/tree/master/mockwebserver)
 (see [`MangaDexCatalogTest`](pixerion-core/src/test/kotlin/io/modernia/pixerion/mangadex/MangaDexCatalogTest.kt)) —
-no live network. The server's tests run the full Spring context against
-in-memory H2, so no live PostgreSQL is needed. Prefer these patterns for new
-code.
+no live network. Prefer this pattern for new code.
 
 Before opening a PR, make sure `./gradlew build` is green (it runs ktlint + all
 tests).
@@ -204,12 +201,10 @@ own source name, scheme, and DTO mapping.
    default HTTP/JSON stack is OkHttp + kotlinx.serialization
    ([ADR-0001](docs/adr/0001-http-and-json-stack-for-source-adapters.md)).
 
-3. **Register it with both front-ends** (each in one place):
-   - the CLI's `catalogFor` `when` in
-     [`CatalogCommand`](pixerion-cli/src/main/kotlin/command/CatalogCommand.kt) — and
-     extend the "known:" hint in the unknown-source error;
-   - the server's `catalogFor` in
-     [`CatalogProvider`](pixerion-server/src/main/java/io/modernia/pixerion/server/catalog/CatalogProvider.java).
+3. **Register it with every front-end** (each in one place). Today that is the
+   CLI's `catalogFor` `when` in
+   [`CatalogCommand`](pixerion-cli/src/main/kotlin/command/CatalogCommand.kt) — and
+   extend the "known:" hint in the unknown-source error.
 
    ```kotlin
    // CLI: pixerion-cli/.../command/CatalogCommand.kt

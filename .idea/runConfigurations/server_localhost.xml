@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="server@main" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="server@localhost" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="pixerion.pixerion-server.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="io.modernia.pixerion.server.Application" />
     <method v="2">

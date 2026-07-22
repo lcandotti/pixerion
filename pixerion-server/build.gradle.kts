@@ -3,7 +3,7 @@
 // It is the web analogue of `:cli` — request -> core -> serialize — and a second
 // thin consumer of the reusable `core` capability. Unlike `core`/`cli` it is a
 // Java module, so it applies the `java` plugin + Spring Boot plugins directly
-// rather than the `kotlin-jvm` convention plugin. See ADR-0007.
+// rather than the `kotlin-jvm` convention plugin.
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
@@ -28,7 +28,7 @@ java {
     }
 }
 
-// The embedded Angular bundle (ADR-0013). A dedicated configuration — not
+// The embedded Angular bundle. A dedicated configuration — not
 // `implementation`/`runtimeOnly` — so the webapp jar rides along only in the runnable
 // artifacts (bootJar/bootRun below) and stays OFF the test classpath: server tests
 // must never trigger an npm/Node build.
@@ -40,13 +40,13 @@ dependencies {
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
     implementation(project(":pixerion-core"))
     // The reusable capability. `core` is coroutine-first, so this module calls it
-    // through core's BlockingCatalog facade (ADR-0007). kotlin-stdlib and coroutines
+    // through core's BlockingCatalog facade. kotlin-stdlib and coroutines
     // arrive transitively because `core` exposes them as `api`.
     implementation(libs.springBootStarterWeb)
-    // Exposes /actuator/health, used as the container healthcheck (see docker-compose.yml).
+    // Exposes /actuator/health, used as the container health check (see docker-compose.yml).
     implementation(libs.springBootStarterActuator)
-    // Auth (ADR-0008): Spring Security secures the app; oauth2-resource-server validates
-    // our stateless JWTs; data-jpa + postgresql + flyway own the user/role store.
+    // Auth + persistence stack: Spring Security secures the app; oauth2-resource-server
+    // validates stateless JWTs; data-jpa + postgresql + flyway for a relational store.
     implementation(libs.springBootStarterSecurity)
     implementation(libs.springBootStarterOauth2ResourceServer)
     implementation(libs.springBootStarterDataJpa)
@@ -56,7 +56,7 @@ dependencies {
     // fails against the un-migrated schema (missing table [app_users]).
     implementation(libs.springBootFlyway)
     implementation(libs.flywayCore)
-    // API docs (ADR-0012): springdoc generates /v3/api-docs from the controllers;
+    // API docs: springdoc generates /v3/api-docs from the controllers;
     // Scalar serves the interactive console at /scalar.
     implementation(libs.springdocOpenapiStarterWebmvcScalar)
     runtimeOnly(libs.flywayPostgresql)
@@ -67,14 +67,14 @@ dependencies {
 
     testImplementation(libs.springBootStarterTest)
     testImplementation(libs.springSecurityTest)
-    // Stands in for the MangaDex API when exercising the CatalogController against a
-    // real catalog (same MockWebServer approach as core's adapter tests) — no live network.
+    // Stands in for a source API when exercising endpoints against a real catalog
+    // (same MockWebServer approach as core's adapter tests) — no live network.
     testImplementation(libs.okhttpMockWebServer)
-    // In-memory DB so the auth/security tests run without a live Postgres.
+    // In-memory DB so tests run without a live Postgres.
     testRuntimeOnly(libs.h2)
-    // Flyway-vs-entities smoke test against a real PostgreSQL container (skipped when
-    // Docker is unavailable); the postgres driver + flyway-database-postgresql above
-    // are runtimeOnly, which the test runtime classpath already extends.
+    // For integration tests against a real PostgreSQL container (skipped when Docker
+    // is unavailable); the postgres driver + flyway-database-postgresql above are
+    // runtimeOnly, which the test runtime classpath already extends.
     testImplementation(libs.springBootTestcontainers)
     testImplementation(libs.testcontainersPostgresql)
     testImplementation(libs.testcontainersJunitJupiter)
@@ -113,7 +113,7 @@ tasks.jacocoTestReport {
 // module as a library, so the plain (non-executable) jar is redundant.
 tasks.bootJar {
     archiveFileName.set("pixerion-server.jar")
-    // Ship the SPA inside the executable jar (ADR-0013): one artifact serves API + UI.
+    // Ship the SPA inside the executable jar: one artifact serves API + UI.
     classpath(webapp)
 }
 

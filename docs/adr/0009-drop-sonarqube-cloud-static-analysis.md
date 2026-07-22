@@ -11,7 +11,7 @@ the `org.sonarqube` Gradle plugin) as the project's static-analysis and
 code-quality gate, fed by JaCoCo coverage. That wiring carried real overhead: a
 root `build.gradle.kts` existing solely to host the Sonar plugin, a `SONAR_TOKEN`
 secret CI depended on, a configuration-cache exception for the `sonar` task, and a
-Sonar-specific rule suppression (`java:S4502`) in the server code.
+Sonar-specific rule suppression (`java:S4502`) in the codebase.
 
 The decisive driver is **cost and free-tier limitations**: SonarQube Cloud's free
 tier is too constrained for this project's needs, and lifting those limits means

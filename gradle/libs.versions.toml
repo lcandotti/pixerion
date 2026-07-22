@@ -14,9 +14,9 @@ graalvmNative = "0.10.6"
 ktlint = "14.2.0"
 springBoot = "4.1.0"
 springdoc = "3.0.3"
-# The Gradle↔npm bridge for the `pixerion-webapp` module (ADR-0013)…
+# The Gradle  ↔ npm bridge for the `pixerion-webapp` module (ADR-0013)…
 nodeGradle = "7.1.0"
-# …and the Node.js runtime it downloads to run `npm run build` (current LTS, "Krypton").
+# … and the Node.js runtime it downloads to run `npm run build` (current LTS, "Krypton").
 nodejs = "24.18.0"
 
 [libraries]

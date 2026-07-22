@@ -68,9 +68,8 @@ remains public API of `core`.
   distinct written labels, so duplicate chapter labels no longer merge in the
   `Summary`.
 - **Contained blast radius:** `Downloader` is the *only* direct consumer of the
-  flow. The interop facade (`BlockingCatalog`) and the server go through
-  `Downloader.Summary` and are untouched (see
-  [ADR-0007](0007-java-web-front-end-and-interop-facade.md)).
+  flow. The interop facade (`BlockingCatalog`) goes through `Downloader.Summary`
+  and is untouched.
 - **Cost:** the contract is richer — a new adapter must emit `Manifest` /
   `ChapterStarted` / `PageReady` (with page counts known before streaming) rather
   than just `send` pages. For a source that cannot cheaply pre-count a chapter's

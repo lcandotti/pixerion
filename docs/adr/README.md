@@ -31,6 +31,8 @@ lightweight [MADR](https://adr.github.io/madr/)-inspired template:
   in place (typo fixes aside).
 - Cross-link related ADRs with `[ADR-NNNN](NNNN-...md)`.
 - Add every new ADR to the index below.
+- Gaps in the numbering are retired ADRs — never reuse a retired number; new ADRs
+  continue from the highest number ever assigned (currently 0013).
 
 ## Index
 
@@ -42,10 +44,5 @@ lightweight [MADR](https://adr.github.io/madr/)-inspired template:
 | [0004](0004-parallel-download-and-layout.md) | Parallel download and on-disk layout | Accepted |
 | [0005](0005-library-namespace-and-publishing-for-shared.md) | Library namespace and publishing for the shared module | Accepted |
 | [0006](0006-sonarqube-cloud-static-analysis.md) | SonarQube Cloud for static analysis | Superseded by [0009](0009-drop-sonarqube-cloud-static-analysis.md) |
-| [0007](0007-java-web-front-end-and-interop-facade.md) | Java web front-end and a blocking interop facade in core | Accepted |
-| [0008](0008-authentication-and-user-management.md) | Authentication, user management, and persistence in the server | Accepted |
 | [0009](0009-drop-sonarqube-cloud-static-analysis.md) | Drop SonarQube Cloud static analysis | Accepted |
 | [0010](0010-structured-download-event-stream.md) | Structured download event stream for progress reporting | Accepted |
-| [0011](0011-streaming-download-progress-sse.md) | Streaming download progress over SSE (job model) | Accepted |
-| [0012](0012-openapi-documentation-with-springdoc-and-scalar.md) | OpenAPI documentation with springdoc + Scalar | Accepted |
-| [0013](0013-embedded-angular-spa-and-api-prefix.md) | Embedded Angular SPA served by the server, API under `/api` | Accepted |

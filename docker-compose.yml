@@ -1,9 +1,6 @@
 # Runs the Pixerion web backend (the :server module) with its PostgreSQL store.
 #
 #   docker compose up --build
-#   TOKEN=$(curl -s -XPOST localhost:8080/auth/login -H 'Content-Type: application/json' \
-#            -d '{"username":"admin","password":"admin"}' | sed 's/.*"token":"\([^"]*\)".*/\1/')
-#   curl -H "Authorization: Bearer $TOKEN" "http://localhost:8080/api/search?q=berserk"
 #
 # Build context is the repo root, so the multi-module Gradle build can see every
 # module; the Dockerfile lives in pixerion-server/.
@@ -35,8 +32,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      # Persist downloads written by POST /api/downloads (the downloader's default
-      # root is ~/.pixerion, which is /home/app/.pixerion for the container user).
+      # Persist downloads (the downloader's default root is ~/.pixerion, which is
+      # /home/app/.pixerion for the container user).
       - pixerion-downloads:/home/app/.pixerion
     healthcheck:
       # Actuator exposes /actuator/health (public, even under security); -f makes curl

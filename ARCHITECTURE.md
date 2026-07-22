@@ -2,8 +2,8 @@
 
 > High-level map of Pixerion, its data flow, and — most importantly — the
 > **pitfalls** that are easy to break when changing the code. Read this before
-> touching the `Catalog` contract, the Java↔Kotlin seam, the download/rate-limit
-> path, or the server's security setup.
+> touching the `Catalog` contract, the Java↔Kotlin seam, or the
+> download/rate-limit path.
 >
 > Keep this file in sync with the code: when a change alters a contract invariant,
 > a module seam, the concurrency/rate-limit model, or the build/security wiring,
@@ -37,12 +37,11 @@ Gradle build with a strict, one-directional dependency graph:
   Coroutine-first (`suspend` / `Flow`). The only module published to Maven.
 - **`cli`** — thin picocli front-end. Parses args → calls `core` → renders. Ships
   as a GraalVM native binary. Not published.
-- **`server`** — thin **Java** Spring Boot (Spring MVC) web front-end. Request →
-  calls `core` (through the blocking interop facade) → serializes JSON. Secured
-  with Spring Security + stateless JWT, users/roles in PostgreSQL. Also serves the
-  `webapp` bundle (see below). Not published.
+- **`server`** — thin **Java** Spring Boot (Spring MVC) web front-end over `core`
+  (through the blocking interop facade). Currently a bare skeleton — just the
+  application bootstrap — being built by hand. Not published.
 - **`webapp`** — the Angular SPA, packaged by Gradle into a jar of static resources
-  the server embeds and serves (ADR-0013). No JVM code; it never touches `core`.
+  embedded into the backend's bootJar. No JVM code; it never touches `core`.
 
 **Rule:** dependencies only ever point *inward* to `core`. `cli` and `server` never
 depend on each other, and `core` never depends on either. Anything reusable belongs
@@ -107,16 +106,9 @@ these calls, must preserve them:
   the adapter's cold `Flow<DownloadEvent>`, and fans page writes out to a bounded
   worker pool, writing under `root` per the `Layout`. It reports live progress to an
   optional `DownloadProgress` listener (default no-op; callbacks serialized so the
-  sink needs no locking) — the seam **both** front-ends render from.
+  sink needs no locking) — the seam front-ends render from.
   Orchestration lives in `core`, not in callers.
   - *CLI:* renders live bars in the terminal (`DownloadProgressView`).
-  - *Server (ADR-0011):* `POST /api/downloads` starts a background **job** (bounded
-    `downloadExecutor`) and returns `202` + an id; the job *is* the `DownloadProgress`
-    sink, accumulating an in-memory snapshot that a `@Scheduled` flusher pushes to
-    `GET /api/downloads/{id}/events` **(SSE)** subscribers — snapshot-then-push, the
-    server analog of the CLI repaint loop. `GET /api/downloads/{id}` reports
-    status/summary. A missing book is a terminal `NOT_FOUND` status (async), not a
-    synchronous 404.
 - **bundle** — `Bundler` (in `core`) is a **pure filesystem** step over an
   already-downloaded tree; no catalog or network. Produces one `.cbz` per chapter.
 
@@ -138,7 +130,7 @@ the bundler breaks bundling silently (it just finds no chapters).
 
 The rest of this document is the important part: concrete traps, grouped by area.
 
-### 4.1 The Java ↔ Kotlin seam (`server` → `core`)
+### 4.1 The Java ↔ Kotlin seam (Java callers → `core`)
 
 `core` is coroutine-first; **Java cannot call `suspend` functions or `runBlocking`
 directly.** Everything Java touches goes through the single interop seam in
@@ -148,12 +140,12 @@ directly.** Everything Java touches goes through the single interop seam in
   blocking `find`/`search`/`download` via `runBlocking`. It is Kotlin because only
   Kotlin can enter the `suspend` world. **Do not** add another `runBlocking` seam
   elsewhere; keep the coroutine-first contract intact and add Java-friendliness
-  only here. (ADR-0007.)
+  only here.
   - *Consequence:* each call **blocks the calling (servlet) thread** until the
     coroutine completes. Fine for Spring MVC; would need rethinking under WebFlux.
   - `download(ref, root?, progress?)` takes an optional `DownloadProgress` — the
     same listener the CLI renders from — so Java can observe live progress without
-    touching coroutines. The server's SSE endpoint implements it (ADR-0011).
+    touching coroutines.
 - **`Refs`** — projects Kotlin-only shapes to plain strings. **`Book.id` is a
   `@JvmInline value class`, so its getter is name-mangled (`getId-<hash>()`) and
   *uncallable* from Java.** Use `Refs.idOf(book)` and `Refs.render(ref)` instead of
@@ -164,17 +156,12 @@ directly.** Everything Java touches goes through the single interop seam in
 type, or `suspend`/`Flow` signature. Add a projection/blocking method to the
 interop seam rather than trying to consume it from Java directly.
 
-### 4.2 Registering a new source in **two** places
+### 4.2 Registering a new source
 
-A new adapter must be wired into **both** front-ends, each in exactly one spot.
-**Forgetting one is a silent gap** (works in the CLI but 400s on the server, or
-vice-versa):
-
-1. CLI: `catalogFor(source)` `when` in
-   `pixerion-cli/src/main/kotlin/command/CatalogCommand.kt` — and add the scheme to
-   the "known:" hint in the unknown-source error message.
-2. Server: `CatalogProvider.catalogFor` in
-   `pixerion-server/.../CatalogProvider.java`.
+A new adapter must be wired into every front-end, each in exactly one spot.
+Today that is the CLI: the `catalogFor(source)` `when` in
+`pixerion-cli/src/main/kotlin/command/CatalogCommand.kt` — and add the scheme to
+the "known:" hint in the unknown-source error message.
 
 See the README "Adding a new catalog" walkthrough for the full checklist (adapter
 package, sibling transport client, `SCHEME` constant, `MockWebServer` test).
@@ -263,82 +250,16 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
   from purely local info — no network. A stray chapter file with that exact name
   is *not* treated as a page (it would collide as a duplicate ZIP entry).
 
-### 4.6 Server security (Spring Security + stateless JWT) — ADR-0008
-
-- **Stateless, bearer-token only.** `SessionCreationPolicy.STATELESS`; auth is a
-  JWT in the `Authorization: Bearer …` header. There is no cookie/session.
-- **CSRF is disabled — and that is safe *here*.** With no ambient credential
-  (cookie/session/Basic) for a browser to auto-attach cross-site, there is nothing
-  for CSRF to forge. This is the recommended config for a token-in-header stateless
-  API, **not** a shortcut; the disable is documented inline where it happens.
-  **If cookie/session auth is ever added, re-enable CSRF.** (See the
-  ADR-0008 "Clarifications" note.)
-- **HS256 must be pinned in *two* places and kept in sync.** `NimbusJwtEncoder`
-  defaults to RS256 and fails to select a key for a symmetric secret, so HS256 is
-  pinned explicitly in the encoder header (`TokenService.issue`) *and* on the
-  decoder (`SecurityConfig.jwtDecoder`). The secret (`app.security.jwt.secret`) must
-  be **≥ 32 bytes** (enforced in `SecurityConfig`'s constructor).
-- **Roles ↔ authorities prefix dance.** JWT `roles` claim holds bare role names;
-  `TokenService` strips the `ROLE_` prefix when minting and `SecurityConfig` re-adds
-  it (`JwtGrantedAuthoritiesConverter` with `ROLE_` prefix) when validating. Keep
-  both sides consistent. `@PreAuthorize("hasRole('ADMIN')")` gates privileged ops
-  (e.g. `POST /api/downloads`) and requires `@EnableMethodSecurity`.
-- **The API is enumerable by prefix (ADR-0013).** Every backend endpoint lives under
-  `/api/**` (catalog/downloads) or `/auth/**`, and `SecurityConfig` authenticates
-  those two families as a whole — a new controller under `/api` is secure by
-  default. Public exceptions: `POST /auth/login`, `/actuator/health`, and the API
-  docs (`/v3/api-docs/**` + the Scalar UI at `/scalar/**`, ADR-0012) — the health
-  probe so the container healthcheck survives security, the docs deliberately (the
-  spec describes the API but exposes no data; calling anything still needs a token;
-  `springdoc.api-docs.enabled` / `scalar.enabled` are env-overridable kill
-  switches). Any *other* GET is the SPA shell and is public (see 4.7); any other
-  write is denied. Don't widen the public API surface casually — and don't add
-  backend endpoints outside `/api`/`/auth`, or they'll fall into the SPA rules.
-- **API docs are generated, not written.** springdoc derives `/v3/api-docs` from the
-  controllers and record DTOs at runtime (`config/OpenApiConfig.java` adds the
-  metadata + global bearer-JWT scheme; public endpoints opt out with an empty
-  `@SecurityRequirements`). Keep controller annotations at moderate depth — `@Tag`,
-  `@Operation` summaries, and `@ApiResponse` only for non-obvious codes; the SSE
-  endpoint is documented in prose because its event union has no OpenAPI schema
-  (ADR-0011 is the contract).
-- **Schema via Flyway; data seeded by code, not SQL.** Flyway owns the schema
-  (`db/migration`), Hibernate is `ddl-auto=validate`. Baseline roles + the initial
-  admin are seeded at startup by the idempotent `DataInitializer`
-  (`ApplicationRunner`) — **not** in a migration — because the admin password must
-  be hashed by the app's `PasswordEncoder`. Admin creds / JWT secret come from
-  `app.admin.*` / `app.security.jwt.*` (local defaults `admin`/`admin` and a dev
-  secret — **override in prod**).
-  - **Boot 4 autoconfig split (gotcha).** Boot 4 broke the monolithic
-    `spring-boot-autoconfigure` into per-technology modules, and
-    `spring-boot-starter-data-jpa` no longer drags in Flyway's. Depending on
-    `flyway-core` alone puts the library on the classpath but *nothing wires it into
-    the lifecycle* — migrations silently never run, then `ddl-auto=validate` fails on
-    the un-migrated schema (`missing table [app_users]`), with **no Flyway log lines**
-    as the tell. The fix is the explicit `spring-boot-flyway` autoconfiguration module
-    (see `pixerion-server/build.gradle.kts`).
-- **Contract preserved as HTTP status.** `CatalogController` maps the absence/failure
-  distinction onto status codes: missing book → 404, `CatalogException` → 502,
-  unknown source → 400.
-
-### 4.7 The embedded SPA (`webapp` → `server`) — ADR-0013
+### 4.6 The embedded SPA (`webapp`)
 
 - **One artifact serves UI + API.** The `pixerion-webapp` jar carries the compiled
   Angular bundle under `META-INF/resources/` (a Spring Boot classpath
-  static-resource root), so the server serves it with no wiring beyond
-  `config/SpaConfig.java`. Same origin ⇒ **no CORS anywhere** — keep it that way.
-- **The `/api` prefix is what keeps the two route spaces disjoint.** SPA pushState
-  routes (`/library`, …) and API routes must never overlap. `SpaConfig` adds the
-  history-API fallback: an unknown GET is answered with `index.html` **unless** it
-  starts with a backend prefix (`api/`, `auth/`, `actuator/`, `v3/`, `scalar`) —
-  those must stay real 404s, never 200-with-HTML. **Adding a backend prefix means
-  updating `SpaConfig.BACKEND_PREFIXES`, the SecurityConfig matchers, and the dev
-  proxy (`pixerion-webapp/proxy.conf.json`) together.**
-- **npm never runs for JVM tests.** The server consumes the webapp jar through a
+  static-resource root), embedded into the backend's bootJar.
+- **npm never runs for JVM tests.** The backend consumes the webapp jar through a
   dedicated `webapp` Gradle configuration wired into `bootJar`/`bootRun` **only** —
   deliberately not `implementation` — so `:pixerion-server:test` has no frontend on
   its classpath and never triggers a Node/npm build. Don't "simplify" it into a
-  normal dependency. (Tests exercise the fallback against a stand-in
-  `index.html` in `src/test/resources`.)
+  normal dependency.
 - **The webapp module is inert until scaffolded.** Its npm tasks skip while
   `pixerion-webapp/package.json` doesn't exist. The Angular app is created with
   `ng new pixerion-webapp --directory . --skip-git` in that directory (the project
@@ -346,22 +267,10 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
   is pinned in the version catalog and auto-downloaded by the `node-gradle` plugin.
 - **Frontend dev loop doesn't build jars**: `./gradlew :pixerion-webapp:run` (or a
   plain `ng serve --proxy-config proxy.conf.json`) starts the hot-reloading dev
-  server on `:4200`, proxying the backend prefixes to `localhost:8080` (run
-  `bootRun` or compose). Gradle builds the bundle only for `bootJar`/`bootRun`.
-- **Browser SSE still needs a fetch-based client** — native `EventSource` can't
-  send `Authorization`, same-origin or not (ADR-0011).
+  server on `:4200`, proxying the backend prefixes to `localhost:8080`. Gradle
+  builds the bundle only for `bootJar`/`bootRun`.
 
-### 4.8 Server tests (Boot 4 / Jackson 3)
-
-- Tests run the **full context against in-memory H2** (Flyway disabled, Hibernate
-  creates the schema, per-context random DB name) so no live Postgres is needed.
-- **Boot 4 ships Jackson 3 (`tools.jackson.*`)** and moved some test-autoconfigure
-  packages. **Avoid `com.fasterxml.jackson` imports and `@AutoConfigureMockMvc`** —
-  use `RestClient` against a random port instead.
-- The `server`'s tests (context load + auth/security, against H2) emit a
-  `jacocoTestReport`, so all three modules contribute coverage to Qodana.
-
-### 4.9 Build, native image & tooling
+### 4.7 Build, native image & tooling
 
 - **Configuration cache is enabled globally** (`gradle.properties`), but the
   **GraalVM native tasks are not compatible** with it. They are
@@ -378,9 +287,9 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
   emits GraalVM reachability metadata at build time; runtime reflection in a command
   would break the native image. `Main.kt` lives in the default package so the
   entrypoint is `MainKt`.
-- **The server applies the Boot BOM via Gradle-native
+- **`pixerion-server`'s build applies the Boot BOM via Gradle-native
   `platform(SpringBootPlugin.BOM_COORDINATES)`** rather than the legacy
-  `io.spring.dependency-management` plugin (see ADR-0012). (This was originally
+  `io.spring.dependency-management` plugin. (This was originally
   motivated by strict dependency verification, since removed, but the Gradle-native
   platform remains the cleaner approach.)
 - **JaCoCo is pinned to a version that understands JDK 25 bytecode** (`0.8.13`) in
@@ -414,11 +323,7 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
 | Bundler | `pixerion-core/.../bundle/Bundler.kt` |
 | Java interop seam | `pixerion-core/.../interop/` (`BlockingCatalog`, `Refs`) |
 | CLI source registry | `pixerion-cli/.../command/CatalogCommand.kt` (`catalogFor`) |
-| Server source registry | `pixerion-server/.../CatalogProvider.java` |
-| Server HTTP + status mapping | `pixerion-server/.../CatalogController.java` |
-| Server auth | `pixerion-server/.../auth/` (`SecurityConfig`, `TokenService`, `DataInitializer`, …) |
-| Server API docs | `pixerion-server/.../config/OpenApiConfig.java` (spec at `/v3/api-docs`, Scalar UI at `/scalar`) |
-| SPA serving + fallback | `pixerion-server/.../config/SpaConfig.java` (backend prefixes exempt) |
+| Web backend bootstrap | `pixerion-server/.../Application.java` (skeleton, built by hand) |
 | Angular app + npm bridge | `pixerion-webapp/` (`build.gradle.kts`, `proxy.conf.json`) |
 | Shared build logic | `buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts` |
 | Dependencies (version catalog) | `gradle/libs.versions.toml` |
