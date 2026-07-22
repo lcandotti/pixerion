@@ -34,7 +34,7 @@ junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" 
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 picocliCodegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 # Versions managed by the Spring Boot BOM (applied via platform() in the server module), so no version.ref here.
-springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
+springBootStarterWebMvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
 springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springBootStarterSecurity = { module = "org.springframework.boot:spring-boot-starter-security" }
 springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }

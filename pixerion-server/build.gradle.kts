@@ -28,10 +28,14 @@ java {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 // The embedded Angular bundle. A dedicated configuration — not
 // `implementation`/`runtimeOnly` — so the webapp jar rides along only in the runnable
 // artifacts (bootJar/bootRun below) and stays OFF the test classpath: server tests
-// must never trigger an npm/Node build.
+// must never trigger a npm/Node build.
 val webapp: Configuration by configurations.creating
 
 dependencies {
@@ -42,7 +46,7 @@ dependencies {
     // The reusable capability. `core` is coroutine-first, so this module calls it
     // through core's BlockingCatalog facade. kotlin-stdlib and coroutines
     // arrive transitively because `core` exposes them as `api`.
-    implementation(libs.springBootStarterWeb)
+    implementation(libs.springBootStarterWebMvc)
     // Exposes /actuator/health, used as the container health check (see docker-compose.yml).
     implementation(libs.springBootStarterActuator)
     // Auth + persistence stack: Spring Security secures the app; oauth2-resource-server
