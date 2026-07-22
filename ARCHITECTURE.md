@@ -386,10 +386,15 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
 - **JaCoCo is pinned to a version that understands JDK 25 bytecode** (`0.8.13`) in
   the `kotlin-jvm` convention plugin *and* directly in `cli`/`server` builds (they
   don't use the convention plugin). Bump all three together. Each module emits an XML
-  coverage report under `build/reports/jacoco/`. The Qodana workflow runs `./gradlew
-  test` to produce these, then `qodana.yaml`'s `bootstrap` stages them into
+  coverage report under `build/reports/jacoco/`. In CI the `verify` job runs
+  `./gradlew test` and hands the XML reports to the `qodana` job as an artifact
+  (restored at the same paths), then `qodana.yaml`'s `bootstrap` stages them into
   `.qodana/code-coverage/` (the directory Qodana reads coverage from); **fresh code**
-  is enabled (`pr-mode: true`) so PRs are gated on their changed code.
+  is enabled (`pr-mode: true`) so PRs are gated on their changed code. The `qodana`
+  job sits between `verify` (ktlint → test) and the artifact builds in
+  `.github/workflows/ci.yml` — a failed scan stops the pipeline before anything is
+  built. Qodana also enforces dependency licenses (`CheckDependencyLicenses`:
+  LGPL-3.0 project license, Apache-2.0 dependencies allowed — see `qodana.yaml`).
   `scripts/local/ci.sh` reproduces the CI `verify` job locally (ktlint → test).
 - **Library choices favor mature JVM incumbents** (OkHttp, kotlinx.serialization for
   its no-reflection, native-image-friendly codegen) over Kotlin-first newcomers.

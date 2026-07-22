@@ -7,8 +7,8 @@
 #     1. ktlintCheck   (lint gate)
 #     2. test          (JUnit 5 + JaCoCo coverage reports)
 #
-# The separate Qodana workflow (`.github/workflows/qodana_code_quality.yml`) can
-# also be reproduced locally via the `qodana` target — same `qodana.yaml`, so it
+# The CI `qodana` job (also in `.github/workflows/ci.yml`, gating the artifact
+# builds) can be reproduced locally via the `qodana` target — same `qodana.yaml`, so it
 # catches code-quality *and* coverage issues (Qodana reads the JaCoCo XML that
 # qodana.yaml's `bootstrap` stages) before they surface in CI. It drives Docker via
 # the Qodana CLI; install hints are printed if the CLI is absent. The `qodana`/`full`
