@@ -3,6 +3,9 @@ name: CI
 # Build pipeline:
 #   * Lint + tests run on every PR to main/develop (open/update/ready) AND again
 #     when the PR is merged.
+#   * Qodana (static analysis + dependency licenses + coverage) runs after
+#     lint/tests and gates the artifact jobs — a failed scan stops the pipeline
+#     before anything is built.
 #   * The two artifacts (runnable JVM distribution + Linux native executable) are
 #     built ONLY when a PR is merged into main/develop — i.e. on the resulting
 #     `push` to those branches — and uploaded with a 7-day retention.
@@ -30,8 +33,9 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Quality gate: linter first, then tests. Both artifact jobs depend on this,
-  # so nothing is published unless lint and tests pass.
+  # Quality gate 1: linter first, then tests. The qodana job (and through it
+  # both artifact jobs) depends on this, so nothing is published unless lint,
+  # tests and the Qodana scan all pass.
   # ---------------------------------------------------------------------------
   verify:
     name: Lint & Test
@@ -67,13 +71,57 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+      # Hand the JaCoCo XML reports to the qodana job (which restores them at the
+      # same paths for qodana.yaml's `bootstrap` to stage), so the scan doesn't
+      # have to re-run the tests. Short retention: purely a job-to-job handoff.
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-coverage
+          path: '**/build/reports/jacoco/test/jacocoTestReport.xml'
+          retention-days: 1
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Quality gate 2 — Qodana (static analysis, dependency licenses, coverage).
+  # Sits between lint/tests and the artifact jobs: both artifact jobs depend on
+  # it, so a failed scan stops the pipeline before anything is built. Coverage
+  # comes from the verify job's JaCoCo artifact — tests are not run twice.
+  # ---------------------------------------------------------------------------
+  qodana:
+    name: Qodana
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # PR comment with the scan summary
+      checks: write # inline annotations on analyzed code
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }} # the actual PR commit, not the merge commit (empty on push → default)
+          fetch-depth: 0 # full history is required for pull request analysis
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v7
+        with:
+          name: jacoco-coverage
+          path: .
+
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@v2026.1
+        with:
+          pr-mode: true # fresh code: PRs are analyzed against only their changed code
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_802218222 }}
+
   # ---------------------------------------------------------------------------
   # Artifact 1 — runnable JVM distribution (bin/pixerion + bundled jars).
   # Needs a JDK to run, but no GraalVM. Portable across OSes.
   # ---------------------------------------------------------------------------
   distribution:
     name: Runnable distribution
-    needs: verify
+    needs: [ verify, qodana ]
     # Only when a PR is merged into main/develop (i.e. a push to those branches),
     # never on the PR itself.
     if: github.event_name == 'push'
@@ -112,7 +160,7 @@ jobs:
   # ---------------------------------------------------------------------------
   native:
     name: Native executable (${{ matrix.label }})
-    needs: verify
+    needs: [ verify, qodana ]
     # Merge into main/develop only (same gate as the distribution artifact).
     if: github.event_name == 'push'
     runs-on: ${{ matrix.os }}
