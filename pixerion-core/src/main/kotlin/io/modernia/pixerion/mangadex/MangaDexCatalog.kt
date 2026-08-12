@@ -88,16 +88,16 @@ class MangaDexCatalog internal constructor(
             val chapters = feed.distinctBy { it.attributes.chapter }
             send(DownloadEvent.Manifest(chapters.size))
             val gate = Semaphore(DOWNLOAD_WORKER)
-            for (chapter in chapters) {
+            for ((id, attributes) in chapters) {
                 launch {
                     gate.withPermit {
-                        val server = client.atHomeServer(chapter.id)
-                        val label = chapter.attributes.chapter.orEmpty()
+                        val server = client.atHomeServer(id)
+                        val label = attributes.chapter.orEmpty()
                         val filenames = server.chapter.data
-                        send(DownloadEvent.ChapterStarted(chapter.id, label, filenames.size))
+                        send(DownloadEvent.ChapterStarted(id, label, filenames.size))
                         filenames.forEachIndexed { index, filename ->
                             val url = "${server.baseUrl}/data/${server.chapter.hash}/$filename"
-                            send(DownloadEvent.PageReady(chapter.id, MangaDexPage(label, index + 1, filename, url, client)))
+                            send(DownloadEvent.PageReady(id, MangaDexPage(label, index + 1, filename, url, client)))
                         }
                     }
                 }
