@@ -4,7 +4,7 @@ import io.modernia.pixerion.domain.BookRef
 import io.modernia.pixerion.domain.Catalog
 import io.modernia.pixerion.domain.CatalogException
 import io.modernia.pixerion.domain.SourceRef
-import io.modernia.pixerion.mangadex.MangaDexCatalog
+import io.modernia.pixerion.source.CatalogRegistry
 import output.Glyph
 import output.Style
 import kotlinx.coroutines.runBlocking
@@ -20,7 +20,6 @@ import java.util.concurrent.Callable
  * unreachable) here, anything else via [ExecutionErrorHandler].
  */
 abstract class CatalogCommand : Callable<Int> {
-
     @Option(
         names = ["-s", "--source"],
         defaultValue = "mangadex",
@@ -29,14 +28,14 @@ abstract class CatalogCommand : Callable<Int> {
     lateinit var source: String
 
     /**
-     * Resolves a source name to a [Catalog]. Defaults to the real source registry
-     * ([catalogFor]); tests substitute a fake so a command can be driven end-to-end
-     * (parse → run → render) without touching the network.
+     * Resolves a source name to a [Catalog]. Defaults to the shared registry in
+     * `core` ([CatalogRegistry]); tests substitute a fake so a command can be
+     * driven end-to-end (parse → run → render) without touching the network.
      */
-    internal var catalogs: (String) -> Catalog? = ::catalogFor
+    internal var catalogs: (String) -> Catalog? = CatalogRegistry::get
 
     final override fun call(): Int {
-        val catalog = catalogs(source) ?: return 2
+        val catalog = catalogs(source) ?: return reportUnknownSource(source)
         return try {
             runBlocking { run(catalog) }
         } catch (e: CatalogException) {
@@ -52,22 +51,18 @@ abstract class CatalogCommand : Callable<Int> {
 }
 
 /**
- * The source registry: maps a `--source` name to its [Catalog], printing a usage
- * error and returning `null` for an unknown source. Register new adapters here.
+ * Renders the usage error for a `--source` no adapter owns, listing the schemes
+ * [CatalogRegistry] actually resolves, and returns exit code `2`.
  */
-internal fun catalogFor(source: String): Catalog? =
-    when (source) {
-        MangaDexCatalog.SCHEME -> MangaDexCatalog()
-        else -> {
-            System.err.println()
-            System.err.println(
-                "  ${Style.error(Glyph.CROSS)} ${Style.error("Unknown source")} ${Style.strong("“$source”")} " +
-                    Style.muted("${Glyph.DOT} known: ${MangaDexCatalog.SCHEME}"),
-            )
-            System.err.println()
-            null
-        }
-    }
+internal fun reportUnknownSource(source: String): Int {
+    System.err.println()
+    System.err.println(
+        "  ${Style.error(Glyph.CROSS)} ${Style.error("Unknown source")} ${Style.strong("“$source”")} " +
+            Style.muted("${Glyph.DOT} known: ${CatalogRegistry.known.joinToString(", ")}"),
+    )
+    System.err.println()
+    return 2
+}
 
 /**
  * Parses a CLI reference string into a [BookRef]: `"scheme:id"` becomes a

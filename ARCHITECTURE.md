@@ -158,13 +158,28 @@ interop seam rather than trying to consume it from Java directly.
 
 ### 4.2 Registering a new source
 
-A new adapter must be wired into every front-end, each in exactly one spot.
-Today that is the CLI: the `catalogFor(source)` `when` in
-`pixerion-cli/src/main/kotlin/command/CatalogCommand.kt` — and add the scheme to
-the "known:" hint in the unknown-source error message.
+A new adapter is registered in **exactly one place**: the `registry` map in
+`io.modernia.pixerion.source.CatalogRegistry`
+(`pixerion-core/src/main/kotlin/io/modernia/pixerion/source/CatalogRegistry.kt`).
+No front-end changes — the CLI resolves `--source` through `CatalogRegistry[…]`
+and renders its "known:" hint from `CatalogRegistry.known`, so the hint cannot
+drift from what actually resolves ([ADR-0014](docs/adr/0014-single-catalog-registry-in-core.md)).
 
-See the README "Adding a new catalog" walkthrough for the full checklist (adapter
-package, sibling transport client, `SCHEME` constant, `MockWebServer` test).
+**Why it lives in `source`, not `domain`:** the registry is the one place in
+`core` that must name concrete adapters. `domain` defines the `Catalog` port and
+must not import its implementations — putting the registry there inverts the
+module's dependency direction and creates a `domain ⇄ source.mangadex` package
+cycle. `io.modernia.pixerion.source` sits above `domain` and can see every
+adapter, which is exactly what a composition point needs.
+
+The table is fixed at class-initialization time — no runtime registration, no
+reflection, no mutable state — so it is thread-safe by construction and adds
+nothing for the CLI's GraalVM native image to discover. Entries are **factories**,
+so an adapter (and the HTTP client it owns) is constructed only for a source that
+is actually queried.
+
+See the CONTRIBUTING "Adding a new catalog" walkthrough for the full checklist
+(adapter package, sibling transport client, `SCHEME` constant, `MockWebServer` test).
 
 ### 4.3 MangaDex transport, rate limiting & retries (`MangaDexClient`)
 
@@ -318,11 +333,11 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
 |---|---|
 | The port | `pixerion-core/.../domain/Catalog.kt` |
 | Refs / identity | `domain/BookRef.kt`, `BookId.kt`, `SourceRef.kt`, `Book.kt` |
-| MangaDex adapter | `pixerion-core/.../mangadex/` (`MangaDexCatalog`, `MangaDexClient`, `MangaDexDto`) |
+| MangaDex adapter | `pixerion-core/.../source/mangadex/` (`MangaDexCatalog`, `MangaDexClient`, `MangaDexDto`) |
 | Download + layout | `pixerion-core/.../download/` (`Downloader`, `Layout`) |
 | Bundler | `pixerion-core/.../bundle/Bundler.kt` |
 | Java interop seam | `pixerion-core/.../interop/` (`BlockingCatalog`, `Refs`) |
-| CLI source registry | `pixerion-cli/.../command/CatalogCommand.kt` (`catalogFor`) |
+| Source registry (all front-ends) | `pixerion-core/.../source/CatalogRegistry.kt` |
 | Web backend bootstrap | `pixerion-server/.../Application.java` (skeleton, built by hand) |
 | Angular app + npm bridge | `pixerion-webapp/` (`build.gradle.kts`, `proxy.conf.json`) |
 | Shared build logic | `buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts` |

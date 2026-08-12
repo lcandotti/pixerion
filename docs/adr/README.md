@@ -32,7 +32,7 @@ lightweight [MADR](https://adr.github.io/madr/)-inspired template:
 - Cross-link related ADRs with `[ADR-NNNN](NNNN-...md)`.
 - Add every new ADR to the index below.
 - Gaps in the numbering are retired ADRs — never reuse a retired number; new ADRs
-  continue from the highest number ever assigned (currently 0013).
+  continue from the highest number ever assigned (currently 0014).
 
 ## Index
 
@@ -46,3 +46,4 @@ lightweight [MADR](https://adr.github.io/madr/)-inspired template:
 | [0006](0006-sonarqube-cloud-static-analysis.md) | SonarQube Cloud for static analysis | Superseded by [0009](0009-drop-sonarqube-cloud-static-analysis.md) |
 | [0009](0009-drop-sonarqube-cloud-static-analysis.md) | Drop SonarQube Cloud static analysis | Accepted |
 | [0010](0010-structured-download-event-stream.md) | Structured download event stream for progress reporting | Accepted |
+| [0014](0014-single-catalog-registry-in-core.md) | A single catalog registry in `core` | Accepted |

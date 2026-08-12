@@ -89,7 +89,7 @@ bash scripts/local/ci.sh tests                # test + coverage; prints report p
 
 Adapter tests drive a real `Catalog` against an in-process
 [`MockWebServer`](https://github.com/square/okhttp/tree/master/mockwebserver)
-(see [`MangaDexCatalogTest`](pixerion-core/src/test/kotlin/io/modernia/pixerion/mangadex/MangaDexCatalogTest.kt)) —
+(see [`MangaDexCatalogTest`](pixerion-core/src/test/kotlin/io/modernia/pixerion/source/mangadex/MangaDexCatalogTest.kt)) —
 no live network. Prefer this pattern for new code.
 
 Before opening a PR, make sure `./gradlew build` is green (it runs ktlint + all
@@ -112,19 +112,20 @@ tests).
 
 A catalog is a source adapter that implements the provider-agnostic
 [`Catalog`](pixerion-core/src/main/kotlin/io/modernia/pixerion/domain/Catalog.kt) port.
-Adding one is self-contained in `core`, plus a one-line registration in **each**
-front-end. The snippets below sketch a placeholder source named `acme` — swap in your
-own source name, scheme, and DTO mapping.
+Adding one is entirely self-contained in `core`: the adapter package plus a
+one-line entry in the shared registry. No front-end changes. The snippets below
+sketch a placeholder source named `acme` — swap in your own source name, scheme,
+and DTO mapping.
 
-1. **Create the adapter package.** Add `pixerion-core/src/main/kotlin/io/modernia/pixerion/<source>/`
+1. **Create the adapter package.** Add `pixerion-core/src/main/kotlin/io/modernia/pixerion/source/<source>/`
    and implement `Catalog` there, mirroring
-   [`MangaDexCatalog`](pixerion-core/src/main/kotlin/io/modernia/pixerion/mangadex/MangaDexCatalog.kt).
+   [`MangaDexCatalog`](pixerion-core/src/main/kotlin/io/modernia/pixerion/source/mangadex/MangaDexCatalog.kt).
    Give it a `SCHEME` constant — the
    [`SourceRef`](pixerion-core/src/main/kotlin/io/modernia/pixerion/domain/SourceRef.kt)
    scheme the adapter owns — and keep all HTTP/JSON out of the adapter by putting it
    in a sibling client (e.g. `AcmeClient`), so the catalog only maps DTOs onto domain
    types (as `MangaDexCatalog` does with
-   [`MangaDexClient`](pixerion-core/src/main/kotlin/io/modernia/pixerion/mangadex/MangaDexClient.kt)):
+   [`MangaDexClient`](pixerion-core/src/main/kotlin/io/modernia/pixerion/source/mangadex/MangaDexClient.kt)):
 
    ```kotlin
    package io.modernia.pixerion.acme
@@ -201,23 +202,29 @@ own source name, scheme, and DTO mapping.
    default HTTP/JSON stack is OkHttp + kotlinx.serialization
    ([ADR-0001](docs/adr/0001-http-and-json-stack-for-source-adapters.md)).
 
-3. **Register it with every front-end** (each in one place). Today that is the
-   CLI's `catalogFor` `when` in
-   [`CatalogCommand`](pixerion-cli/src/main/kotlin/command/CatalogCommand.kt) — and
-   extend the "known:" hint in the unknown-source error.
+3. **Register it — one entry, one file.** Add your scheme to the `registry` map in
+   [`CatalogRegistry`](pixerion-core/src/main/kotlin/io/modernia/pixerion/source/CatalogRegistry.kt).
+   No front-end changes are needed: the CLI (and the web backend) resolve
+   `--source` through the registry and render their "known:" hints from
+   `CatalogRegistry.known`
+   ([ADR-0014](docs/adr/0014-single-catalog-registry-in-core.md)).
 
    ```kotlin
-   // CLI: pixerion-cli/.../command/CatalogCommand.kt
-   private fun catalogFor(source: String): Catalog? = when (source) {
-       MangaDexCatalog.SCHEME -> MangaDexCatalog()
-       AcmeCatalog.SCHEME -> AcmeCatalog()
-       else -> { /* ...unknown-source error... */ }
-   }
+   // pixerion-core/.../source/CatalogRegistry.kt
+   private val registry: Map<String, () -> Catalog> =
+       mapOf(
+           MangaDexCatalog.SCHEME to ::MangaDexCatalog,
+           AcmeCatalog.SCHEME to ::AcmeCatalog,
+       )
    ```
 
-4. **Test it.** Add a test under `pixerion-core/src/test/kotlin/io/modernia/pixerion/<source>/`
+   Entries are factories, so nothing is constructed for a source nobody queries.
+   Keep the registry free of runtime registration and reflection — it must stay
+   resolvable at build time for the CLI's native image.
+
+4. **Test it.** Add a test under `pixerion-core/src/test/kotlin/io/modernia/pixerion/source/<source>/`
    that exercises the adapter against a `MockWebServer`
-   ([like `MangaDexCatalogTest`](pixerion-core/src/test/kotlin/io/modernia/pixerion/mangadex/MangaDexCatalogTest.kt)),
+   ([like `MangaDexCatalogTest`](pixerion-core/src/test/kotlin/io/modernia/pixerion/source/mangadex/MangaDexCatalogTest.kt)),
    covering search/find mapping, a clean miss (`null`/empty), and the
    failure-to-`CatalogException` translation.
 

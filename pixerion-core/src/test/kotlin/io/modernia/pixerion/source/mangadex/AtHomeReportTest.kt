@@ -1,4 +1,4 @@
-package io.modernia.pixerion.mangadex
+package io.modernia.pixerion.source.mangadex
 
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse

@@ -1,4 +1,4 @@
-package io.modernia.pixerion.mangadex
+package io.modernia.pixerion.source.mangadex
 
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test

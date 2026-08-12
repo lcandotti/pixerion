@@ -1,8 +1,10 @@
 package command
 
 import io.modernia.pixerion.domain.SourceRef
-import io.modernia.pixerion.mangadex.MangaDexCatalog
+import io.modernia.pixerion.source.CatalogRegistry
+import io.modernia.pixerion.source.mangadex.MangaDexCatalog
 import org.junit.jupiter.api.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
@@ -29,16 +31,21 @@ class CatalogResolverTest {
     }
 
     @Test
-    fun `catalogFor resolves the known mangadex source`() {
-        assertIs<MangaDexCatalog>(catalogFor(MangaDexCatalog.SCHEME))
+    fun `the registry resolves the known mangadex source`() {
+        assertIs<MangaDexCatalog>(CatalogRegistry[MangaDexCatalog.SCHEME])
     }
 
     @Test
-    fun `catalogFor reports an unknown source and returns null`() {
-        var resolved: Any? = "unset"
-        val captured = captureOutput { resolved = catalogFor("nope"); if (resolved == null) 2 else 0 }
+    fun `the registry returns null for a source no adapter owns`() {
+        assertNull(CatalogRegistry["nope"])
+    }
+
+    @Test
+    fun `reportUnknownSource lists the schemes the registry resolves`() {
+        val captured = captureOutput { reportUnknownSource("nope") }
         assertEquals(2, captured.code)
-        assertNull(resolved)
-        assertEquals(true, captured.err.contains("Unknown source"))
+        assertContains(captured.err, "Unknown source")
+        // The hint is rendered from the registry, so it cannot drift from what resolves.
+        CatalogRegistry.known.forEach { assertContains(captured.err, it) }
     }
 }

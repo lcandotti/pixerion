@@ -38,7 +38,7 @@ bash scripts/local/ci.sh            # reproduce the CI `verify` job locally (ktl
 Run a single test (JUnit 5 via Gradle):
 
 ```sh
-./gradlew :pixerion-core:test --tests "io.modernia.pixerion.mangadex.MangaDexCatalogTest"
+./gradlew :pixerion-core:test --tests "io.modernia.pixerion.source.mangadex.MangaDexCatalogTest"
 ./gradlew :pixerion-core:test --tests "*MangaDexCatalogTest.find returns null*"   # single method
 ```
 
@@ -53,14 +53,16 @@ Key contract invariants (preserve these when adding adapters):
 - **`download` is a cold `Flow<DownloadEvent>`.** Collecting drives the download; the stream carries structure for determinate progress — `Manifest(chapters)` first, then per chapter a `ChapterStarted(chapterId, label, pages)` then one `PageReady(chapterId, page)` per page. Each `PageReady.page.bytes()` is fetched lazily so large books stream rather than materialize. `Downloader.download` takes an optional `DownloadProgress` listener (the CLI's live progress bars render from it). See ADR-0010.
 - A reference is a `BookRef` — either a portable `BookId` or a source-scoped `SourceRef(scheme, value)`. An adapter resolves only the schemes it owns and returns `null`/empty for refs it can't resolve.
 
-**MangaDexCatalog** (`io.modernia.pixerion.mangadex`) is the only adapter. HTTP/JSON transport is isolated in `MangaDexClient`; the catalog only maps DTOs (`MangaDexDto`) onto domain types. New adapters must follow this split: catalog = mapping, sibling client = all OkHttp/serialization.
+Adapters live under `io.modernia.pixerion.source.*`, one package each, indexed by `io.modernia.pixerion.source.CatalogRegistry` — an immutable scheme→factory map that is the single place a new source is registered. It sits *above* `domain` deliberately: the domain owns the `Catalog` port and must never import an implementation (ADR-0014).
+
+**MangaDexCatalog** (`io.modernia.pixerion.source.mangadex`) is the only adapter. HTTP/JSON transport is isolated in `MangaDexClient`; the catalog only maps DTOs (`MangaDexDto`) onto domain types. New adapters must follow this split: catalog = mapping, sibling client = all OkHttp/serialization.
 
 `Downloader` and `Bundler` (cbz packaging) are pure `core` capabilities the CLI invokes with parameters — orchestration stays out of the CLI. On-disk layout is `<root>/<source>/<book>/chapters/ch-<chapter>/<NNN>.<ext>` under `~/.pixerion` by default — raw chapters sit under a dedicated `chapters/` purpose layer beside sibling layers like the bundler's `cbz/` (dropping it breaks the bundler; see `StandardLayout`).
 
 ### Adding a catalog source
 
-1. New package under `pixerion-core/src/main/kotlin/io/modernia/pixerion/<source>/`: a `Catalog` impl mirroring `MangaDexCatalog`, a sibling client for transport, a `SCHEME` constant.
-2. Register it in every thin front-end, each in one place — today that is the CLI's `catalogFor(source)` `when` in `pixerion-cli/.../command/CatalogCommand.kt` (add it to the "known" list in the error message too).
+1. New package under `pixerion-core/src/main/kotlin/io/modernia/pixerion/source/<source>/`: a `Catalog` impl mirroring `MangaDexCatalog`, a sibling client for transport, a `SCHEME` constant.
+2. Add one entry to the `registry` map in `io.modernia.pixerion.source.CatalogRegistry` (`pixerion-core/.../source/CatalogRegistry.kt`). **That is the only registration point** — front-ends resolve `--source` names through it and render their "known:" hints from `CatalogRegistry.known`, so no CLI or server change is needed.
 3. Test against an in-process OkHttp `MockWebServer` (see `MangaDexCatalogTest`) — no live network.
 
 ### Consuming `core` from Java

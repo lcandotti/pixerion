@@ -1,4 +1,4 @@
-package io.modernia.pixerion.mangadex
+package io.modernia.pixerion.source.mangadex
 
 import io.modernia.pixerion.domain.BookId
 import io.modernia.pixerion.domain.CatalogException

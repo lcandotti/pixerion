@@ -39,7 +39,7 @@ flowchart TD
     B3 -->|"progress callbacks"| C1
 ```
 
-**Where each stage lives:** ① `MangaDexCatalog.download` (`pixerion-core/.../mangadex`),
+**Where each stage lives:** ① `MangaDexCatalog.download` (`pixerion-core/.../source/mangadex`),
 ② `Downloader.download` (`pixerion-core/.../download`), ③ `DownloadProgressView`
 (`pixerion-cli/.../output`). ① and ② run in **two independent coroutine scopes** —
 the adapter's `channelFlow` and the downloader's `coroutineScope` — that share no
@@ -79,7 +79,7 @@ Because the flow is **cold**, none of this happens until someone collects it;
 
 ## Producer side — `MangaDexCatalog.download`
 
-[`MangaDexCatalog.kt`](../../pixerion-core/src/main/kotlin/io/modernia/pixerion/mangadex/MangaDexCatalog.kt):
+[`MangaDexCatalog.kt`](../../pixerion-core/src/main/kotlin/io/modernia/pixerion/source/mangadex/MangaDexCatalog.kt):
 
 ```kotlin
 channelFlow {

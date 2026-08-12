@@ -1,8 +1,8 @@
-package io.modernia.pixerion.mangadex
+package io.modernia.pixerion.source.mangadex
 
 import io.modernia.pixerion.domain.Catalog
 import io.modernia.pixerion.domain.CatalogException
-import io.modernia.pixerion.mangadex.MangaDexClient.Companion.MAX_REQUESTS_PER_HOST
+import io.modernia.pixerion.source.mangadex.MangaDexClient.Companion.MAX_REQUESTS_PER_HOST
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
