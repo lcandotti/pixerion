@@ -33,10 +33,29 @@ docker compose up postgres            # infrastructure only
 ./gradlew :pixerion-server:bootRun    # the backend on your host, port 8080
 ```
 
-No configuration needed: `application.properties` defaults already point at
-`localhost:5432` with the compose credentials (`pixerion`/`pixerion`). Restart
-`bootRun` to pick up a change. Don't run the compose `server` service at the
-same time — it also binds port 8080 (`docker compose stop server` if it's up).
+`application.properties` defaults already point at `localhost:5432` with the
+compose credentials (`pixerion`/`pixerion`). Restart `bootRun` to pick up a
+change. Don't run the compose `server` service at the same time — it also binds
+port 8080 (`docker compose stop server` if it's up).
+
+> **Known gap:** the compose `postgres` service declares no `ports:` mapping, so
+> 5432 is reachable only from inside the compose network and the two commands
+> above do *not* work together — `bootRun` dies with `Connection to
+> localhost:5432 refused`. Until the mapping is added, run the database directly:
+>
+> ```sh
+> docker run -d --rm --name pixerion-pg -p 5432:5432 \
+>   -e POSTGRES_DB=pixerion -e POSTGRES_USER=pixerion -e POSTGRES_PASSWORD=pixerion \
+>   postgres:17
+> ```
+
+### Poking the running backend
+
+[`pixerion-server/http/`](pixerion-server/http/) holds a JetBrains HTTP Client
+request set (`api.http`) covering every endpoint the module currently exposes,
+plus negative requests that pin the `SecurityConfig` rules. Run it from the IDE
+via the `http@api` configuration, or headless with `ijhttp`. See its
+[README](pixerion-server/http/README.md).
 
 ### Frontend loop (webapp code)
 

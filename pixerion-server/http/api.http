@@ -1,0 +1,201 @@
+# Pixerion server — the endpoints that exist today
+#
+# Select the "dev" environment (top-right dropdown in IntelliJ, or `--env dev`
+# with the ijhttp CLI) and run top to bottom.
+#
+# The server must be up — see README.md in this folder for the prerequisites.
+#
+# ORDER MATTERS from "Log in" onwards: that request stashes its token in the
+# `accessToken` client variable, and every authenticated request below reads it.
+# Everything above it is independent and can be run on its own.
+
+### Home (public)
+GET {{baseUrl}}/
+Accept: text/plain
+
+> {%
+    client.test("home is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("greeting body", () => client.assert(
+        response.body.toString().indexOf("Hello, from pixerion-server") >= 0, "unexpected body"));
+%}
+
+### Health check (public — permitAll via EndpointRequest.to("health"))
+GET {{baseUrl}}/actuator/health
+Accept: application/json
+
+> {%
+    client.test("health is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("status is UP", () => client.assert(response.body.status === "UP", "expected UP"));
+    client.log("Health groups: " + JSON.stringify(response.body.groups));
+%}
+
+### [negative] OpenAPI document → 401 (currently unreachable — see below)
+# DECISION PENDING. springdoc and Scalar are on the classpath on purpose, but neither
+# /v3/api-docs nor /scalar matches any rule in SecurityConfig, so both fall through to
+# the terminal denyAll(): 401 without a token, 403 with one. /scalar is effectively
+# dead as configured — a browser opening the console cannot attach a bearer header.
+#
+# To open them up, add one line to authorizeHttpRequests (above the terminal rule):
+#     .requestMatchers(HttpMethod.GET, "/v3/api-docs/**", "/scalar/**").permitAll()
+# and flip these two assertions to 200. Whether an unauthenticated API console is
+# acceptable is an exposure decision — in dev it is convenient, in production it
+# publishes your endpoint inventory.
+GET {{baseUrl}}/v3/api-docs
+Accept: application/json
+
+> {%
+    client.test("api-docs is currently 401", () => client.assert(
+        response.status === 401,
+        "expected 401 — got " + response.status + ". If this is 200, the docs were permitted: update this request."));
+%}
+
+### [negative] Scalar API console → 401 (currently unreachable — see above)
+GET {{baseUrl}}/scalar
+
+> {%
+    client.test("scalar is currently 401", () => client.assert(
+        response.status === 401,
+        "expected 401 — got " + response.status + ". If this is 200, the docs were permitted: update this request."));
+%}
+
+### Log in — the only /api/** path that does not require a token
+# Credentials come from V3__seed_admin.sql, which is a local dev seed. The token is
+# stashed below and reused by every authenticated request that follows.
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pixerion.local",
+  "password": "changeme"
+}
+
+> {%
+    client.test("login is 200", () => client.assert(response.status === 200, "expected 200"));
+    client.test("returns a token", () => client.assert(
+        typeof response.body.accessToken === "string" && response.body.accessToken.length > 0,
+        "no accessToken in response"));
+    client.global.set("accessToken", response.body.accessToken);
+    client.log("Token expires in " + response.body.expiresIn + "s");
+%}
+
+### /api/** with a valid token → past security, then 404
+# The distinction matters: 404 means authentication succeeded and the request fell
+# through to a path with no handler. A 401 here would mean the token was rejected.
+GET {{baseUrl}}/api/anything
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    client.test("valid token gets past security", () => client.assert(
+        response.status === 404, "expected 404 — got " + response.status));
+%}
+
+### Actuator discovery with an ADMIN token → 200
+# The payoff of the whole role chain, in one request: the users/roles/user_roles rows
+# become authorities in UserService, ride along in the token's `roles` claim, and are
+# turned back into authorities by SecurityConfig.jwtAuthenticationConverter() so that
+# `hasRole("ADMIN")` matches. If this 403s, the claim and the converter disagree.
+GET {{baseUrl}}/actuator
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    client.test("admin reaches actuator", () => client.assert(response.status === 200, "expected 200"));
+%}
+
+### [negative] Bad password → 401
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@pixerion.local",
+  "password": "not-the-password"
+}
+
+> {%
+    client.test("bad password is 401", () => client.assert(response.status === 401, "expected 401"));
+    client.test("does not reveal whether the account exists", () => client.assert(
+        response.body.detail === "Invalid email or password.", "unexpected detail: " + response.body.detail));
+%}
+
+### [negative] Blank credentials → 400 (rejected by @Valid, before authentication)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": ""
+}
+
+> {%
+    client.test("blank credentials are 400", () => client.assert(response.status === 400, "expected 400"));
+%}
+
+### [negative] /api/** without a token → 401
+# Pins the `.requestMatchers("/api/**").authenticated()` rule. This keeps passing
+# once real endpoints land under /api — it asserts the rule, not a controller.
+GET {{baseUrl}}/api/anything
+Accept: application/json
+
+> {%
+    client.test("no token is 401", () => client.assert(response.status === 401, "expected 401"));
+%}
+
+### [negative] /api/** with a structurally invalid token → 401
+# A token that isn't a parseable JWT is rejected outright, not ignored.
+GET {{baseUrl}}/api/anything
+Authorization: Bearer a.b.c
+Accept: application/json
+
+> {%
+    client.test("garbage token is 401", () => client.assert(response.status === 401, "expected 401"));
+%}
+
+### [negative] /api/** with a well-formed but foreign token → 401
+# Parseable JWT, signed with a different key. Rejected on signature verification.
+#
+# This used to assert 500: the HMAC key was derived from a 14-byte literal, below the
+# 256 bits Nimbus requires for HS256, so building the verifier threw KeyLengthException
+# and escaped as an unhandled 500. The secret is now long enough (and JwtProperties
+# enforces it with @Size(min = 32)), so the request reaches the normal 401 path.
+GET {{baseUrl}}/api/anything
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYiLCJleHAiOjQxMDI0NDQ4MDB9.wFRAvIwOKXvCwOsSl9SLzHnjuJU_DXbUEipMe2r0k9E
+Accept: application/json
+
+> {%
+    client.test("foreign token is 401", () => client.assert(response.status === 401, "expected 401"));
+%}
+
+### [negative] Actuator discovery without a token → 401 (ADMIN only)
+# EndpointRequest.toAnyEndpoint() covers /actuator itself, and the rule above it
+# only exempts "health".
+GET {{baseUrl}}/actuator
+Accept: application/json
+
+> {%
+    client.test("actuator root is 401", () => client.assert(response.status === 401, "expected 401"));
+%}
+
+### [negative] An actuator endpoint that isn't exposed → 401
+# /actuator/metrics is hidden by `management.endpoints.web.exposure.include=health`
+# in application.properties. The subtlety: EndpointRequest.toAnyEndpoint() matches
+# only *exposed* endpoints, so this path never reaches the ADMIN rule — it falls
+# through to the terminal denyAll() and is refused before routing. With a valid
+# token it is 403 rather than 404 for the same reason. Add "metrics" to that
+# property and it becomes a normal ADMIN-gated endpoint.
+GET {{baseUrl}}/actuator/metrics
+Accept: application/json
+
+> {%
+    client.test("unexposed endpoint is 401", () => client.assert(response.status === 401, "expected 401"));
+%}
+
+### [negative] An unmapped path → 401, NOT 404
+# SecurityConfig's last rule is `.anyRequest().denyAll()`, so an unclassified path is
+# refused before routing ever happens — the 401 does not tell an attacker whether the
+# path exists. That is the point of a terminal deny.
+GET {{baseUrl}}/nope
+
+> {%
+    client.test("unmapped path is 401", () => client.assert(response.status === 401, "expected 401"));
+%}

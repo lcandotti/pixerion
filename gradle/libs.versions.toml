@@ -7,6 +7,7 @@ kotlin = "2.4.0"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJSON = "1.9.0"
 kotlinxCoroutines = "1.10.2"
+lombok = "1.18.46"
 okhttp = "4.12.0"
 junit = "5.11.4"
 picocli = "4.7.6"
@@ -27,6 +28,7 @@ kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.r
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttpMockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
@@ -51,6 +53,10 @@ h2 = { module = "com.h2database:h2" }
 # The 3.x line targets Boot 4 (2.x does not). Not in the Boot BOM, so it needs an explicit version.
 springdocOpenapiStarterWebmvcScalar = { module = "org.springdoc:springdoc-openapi-starter-webmvc-scalar", version.ref = "springdoc" }
 springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
+# Boot 4 moved the MockMvc test slice (@AutoConfigureMockMvc, @WebMvcTest) out of
+# spring-boot-test-autoconfigure into this per-technology module — same split as
+# spring-boot-flyway above.
+springBootWebmvcTest = { module = "org.springframework.boot:spring-boot-webmvc-test" }
 springSecurityTest = { module = "org.springframework.security:spring-security-test" }
 # Testcontainers (2.x artifact names; versions managed by the Boot BOM, which imports the
 # testcontainers-bom): a real PostgreSQL for the server's Flyway-vs-entities smoke test;

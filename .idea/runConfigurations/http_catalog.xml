@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="http@catalog" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" path="$PROJECT_DIR$/pixerion-server/http/catalog.http" executionIdentifier="Search a catalog by title (any authenticated user) — captures {{bookId}}">
-    <method v="2" />
-  </configuration>
-</component>

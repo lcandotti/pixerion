@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="http@api" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" environment="dev" path="$PROJECT_DIR$/pixerion-server/http/api.http" executionIdentifier="Home (public)">
+    <method v="2" />
+  </configuration>
+</component>

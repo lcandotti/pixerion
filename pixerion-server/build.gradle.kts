@@ -43,6 +43,12 @@ dependencies {
     // legacy io.spring.dependency-management plugin).
     implementation(platform(SpringBootPlugin.BOM_COORDINATES))
     implementation(project(":pixerion-core"))
+    // Utilities libraries. Lombok is a compile-time-only code generator: it must be on
+    // the `annotationProcessor` configuration to run at all (Gradle does not execute
+    // processors found on the compile classpath), and `compileOnly` keeps it out of the
+    // runtime jar, where it has nothing to do.
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
     // The reusable capability. `core` is coroutine-first, so this module calls it
     // through core's BlockingCatalog facade. kotlin-stdlib and coroutines
     // arrive transitively because `core` exposes them as `api`.
@@ -50,14 +56,14 @@ dependencies {
     // Exposes /actuator/health, used as the container health check (see docker-compose.yml).
     implementation(libs.springBootStarterActuator)
     // Auth + persistence stack: Spring Security secures the app; oauth2-resource-server
-    // validates stateless JWTs; data-jpa + postgresql + flyway for a relational store.
+    // validates stateless JWTs; data-jpa + PostgreSQL + flyway for a relational store.
     implementation(libs.springBootStarterSecurity)
     implementation(libs.springBootStarterOauth2ResourceServer)
     implementation(libs.springBootStarterDataJpa)
     implementation(libs.springBootStarterValidation)
     // Boot 4 moved FlywayAutoConfiguration out of the monolithic autoconfigure jar into
     // this per-technology module; without it Flyway never runs and ddl-auto=validate
-    // fails against the un-migrated schema (missing table [app_users]).
+    // fails against the un-migrated schema (missing table [users]).
     implementation(libs.springBootFlyway)
     implementation(libs.flywayCore)
     // API docs: springdoc generates /v3/api-docs from the controllers;
@@ -70,6 +76,7 @@ dependencies {
     webapp(project(":pixerion-webapp"))
 
     testImplementation(libs.springBootStarterTest)
+    testImplementation(libs.springBootWebmvcTest)
     testImplementation(libs.springSecurityTest)
     // Stands in for a source API when exercising endpoints against a real catalog
     // (same MockWebServer approach as core's adapter tests) — no live network.
@@ -77,7 +84,7 @@ dependencies {
     // In-memory DB so tests run without a live Postgres.
     testRuntimeOnly(libs.h2)
     // For integration tests against a real PostgreSQL container (skipped when Docker
-    // is unavailable); the postgres driver + flyway-database-postgresql above are
+    // is unavailable); the Postgres driver + flyway-database-postgresql above are
     // runtimeOnly, which the test runtime classpath already extends.
     testImplementation(libs.springBootTestcontainers)
     testImplementation(libs.testcontainersPostgresql)
