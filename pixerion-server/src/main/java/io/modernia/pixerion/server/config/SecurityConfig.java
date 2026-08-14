@@ -60,7 +60,7 @@ public class SecurityConfig {
                         // Let the container render its error page. Authorization runs on
                         // every dispatch, not just REQUEST, so without this the terminal
                         // denyAll() below re-denies the internal forward to /error and
-                        // every error is rewritten — a 400 surfaces as an empty 401, a 404
+                        // every error is rewritten — 400 surfaces as an empty 401, a 404
                         // as an empty 403. The original request was already authorized (or
                         // rejected) on its own dispatch; this only governs rendering.
                         .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
@@ -120,10 +120,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-   @Bean
-   public SecretKey generate(JwtProperties jwt) {
+    @Bean
+    public SecretKey generate(JwtProperties jwt) {
         return new SecretKeySpec(jwt.secret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-   }
+    }
 
     @Bean
     public JwtEncoder jwtEncoder(SecretKey key) {
