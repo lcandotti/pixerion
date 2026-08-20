@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("default-src 'self'; img-src 'self'; object-src 'none'; frame-ancestors 'none'")))
+                                .policyDirectives("default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' https://fonts.scalar.com; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'")))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth -> oauth
@@ -72,6 +72,8 @@ public class SecurityConfig {
                         // token. Rules match in declaration order, so this MUST stay above
                         // the /api/** rule below or logging in becomes impossible.
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v3/api-docs", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/scalar", "/scalar/**").permitAll()
                         // Everything else on /actuator/** is ADMIN-only
                         .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()

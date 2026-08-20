@@ -2,7 +2,17 @@ package io.modernia.pixerion.server.auth.controllers;
 
 import io.modernia.pixerion.server.config.JwtProperties;
 import io.modernia.pixerion.server.config.SecurityConfig;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +40,7 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Sign in")
 public class TokenController {
 
     private final AuthenticationManager authenticationManager;
@@ -43,15 +54,27 @@ public class TokenController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Obtain a JWT token", description = "Return an access token to access protected endpoint")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Obtain a valid access token"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid email / password",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ProblemDetail.class)))
+    })
     public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest) {
         // Throws BadCredentialsException on a bad password *or* an unknown email —
         // DaoAuthenticationProvider hides UsernameNotFoundException behind it by default
         // so the response cannot be used to probe which accounts exist.
-        Authentication authentication = authenticationManager.authenticate(
+        var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
 
-        Instant now = Instant.now();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        var now = Instant.now();
+        var claims = JwtClaimsSet.builder()
                 .issuer("pixerion")
                 .issuedAt(now)
                 .expiresAt(now.plus(jwtProperties.ttl()))
@@ -65,7 +88,7 @@ public class TokenController {
                         .toList())
                 .build();
 
-        String token = jwtEncoder
+        var token = jwtEncoder
                 .encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
                 .getTokenValue();
 

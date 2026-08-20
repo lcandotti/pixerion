@@ -9,6 +9,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 plugins {
     java
     alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDoc)
     // Code coverage. Like `cli`, this module applies its own plugin set (it is a Java
     // Spring Boot module, not a `kotlin-jvm` convention module), so it wires JaCoCo
     // directly here — same config — emitting an XML report for the coverage tooling.
@@ -45,7 +46,7 @@ dependencies {
     implementation(project(":pixerion-core"))
     // Utilities libraries. Lombok is a compile-time-only code generator: it must be on
     // the `annotationProcessor` configuration to run at all (Gradle does not execute
-    // processors found on the compile classpath), and `compileOnly` keeps it out of the
+    // processors found on to compile classpath), and `compileOnly` keeps it out of the
     // runtime jar, where it has nothing to do.
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
@@ -74,6 +75,8 @@ dependencies {
     // The Angular SPA, packaged as a jar of static resources (see the `webapp`
     // configuration above for why it isn't a normal implementation dependency).
     webapp(project(":pixerion-webapp"))
+
+    developmentOnly(libs.springBootDevTools)
 
     testImplementation(libs.springBootStarterTest)
     testImplementation(libs.springBootWebmvcTest)
@@ -134,4 +137,10 @@ tasks.bootRun {
 
 tasks.jar {
     enabled = false
+}
+
+listOf("forkedSpringBootRun", "forkedSpringBootStop").forEach { taskName ->
+    tasks.matching { it.name == taskName }.configureEach {
+        notCompatibleWithConfigurationCache("SpringDoc is not configuration-cache compatible")
+    }
 }

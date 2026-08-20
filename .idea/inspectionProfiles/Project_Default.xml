@@ -1,6 +1,475 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherAES" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherAES128" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherAES192" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherAES256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherArcfour" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherBlowfish" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherChaCha20" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherDES" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherECIES" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherRC2" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherRC4" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherRC5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherRSA" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyCipherTripleDES" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKDFSHA256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKDFSHA384" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKDFSHA512" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKEMDiffieHellman" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKEMMLKEM" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKEMMLKEM1024" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKEMMLKEM512" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKEMMLKEM768" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKeyAgreementDiffieHellman" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKeyAgreementECDH" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKeyAgreementECMQV" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKeyAgreementX25519" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKeyAgreementX448" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyKeyAgreementXDH" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacMD5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA224" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA3224" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA3256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA3384" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA3512" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA384" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA512" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA512224" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMacSHA512256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestMD2" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestMD5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA224" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA3224" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA3256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA3384" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA3512" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA384" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA512" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA512224" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHA512256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHAKE128" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographyMessageDigestSHAKE256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextDTLS10" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextDTLS12" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextSSL" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextSSL2" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextSSL3" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextTLS1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextTLS11" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySSLContextTLS12" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureDSA" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureECDSA" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureEd25519" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureEd448" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureEdDSA" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureHSSLMSwithSHA256" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureMLDSA" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureMLDSA44" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureMLDSA65" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureMLDSA87" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="JavaKotlinUsingCryptographySignatureRSA" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SqlNoDataSourceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="c_access_rule-RpcImpersonateClient-ImpersonateLoggedOnUser" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_access_rule-umask" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-MultiByteToWideChar" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-StrCat-StrCatA" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-fscanf-sscanf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-g-get-home-dir" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-g-get-tmp-dir" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-getenv-curl-getenv" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-gets--getts" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-getwd" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-lstrcat-wcscat" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-lstrcatn-wcsncat" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-lstrcpy-wcscpy" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-lstrcpyn-wcsncpy" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-memcpy-CopyMemory" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-realpath" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-scanf-vscanf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-sprintf-vsprintf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strcat" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strccpy-strcadd" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strcpy" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strcpyA-strcpyW" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-streadd-strecpy" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strlen-wcslen" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strncat" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strncpy" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_buffer_rule-strtrns" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_crypto_rule-EVP-des-ecb-EVP-des-cbc" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_crypto_rule-EVP-rc4-40-EVP-rc2-40-cbc" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_crypto_rule-crypt-crypt-r" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_format_rule-fprintf-vfprintf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_format_rule-printf-vprintf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_format_rule-snprintf-vsnprintf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_format_rule-syslog" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_free_rule-memalign" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_integer_rule-atoi-atol" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-AddAccessAllowedAce" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-LoadLibrary" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-LoadLibraryEx" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-SetSecurityDescriptorDacl" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-cuserid" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-fopen-open" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-getlogin" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_misc_rule-getpass" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_obsolete_rule-gsignal-ssignal" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_obsolete_rule-ulimit" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_obsolete_rule-usleep" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_race_rule-access" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_race_rule-chmod" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_race_rule-chown" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_race_rule-readlink" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_race_rule-vfork" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_random_rule-drand48-erand48" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_shell_rule-CreateProcess" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_shell_rule-CreateProcessAsUser-CreateProcessWithLogon" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_shell_rule-execl-execlp" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_shell_rule-system" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_tmpfile_rule-GetTempFileName" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_tmpfile_rule-mkstemp" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_tmpfile_rule-mktemp" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="c_tmpfile_rule-tmpfile" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="c_tmpfile_rule-tmpnam-tempnam" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp-command-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-conditional-bypass" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-reflected-xss" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-reflected-xss-asp" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-sql-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-stored-xss" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-tainted-path" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-url-redirect" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-xpath-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp-zip-slip" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp_cookies_rule-CookieWithoutHttpOnlyFlag" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_cookies_rule-CookieWithoutSSLFlag" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_crypto_rule-CertificateValidationDisabled" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_crypto_rule-WeakCipherAlgorithm" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_crypto_rule-WeakCipherMode" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_crypto_rule-WeakHashingFunction" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_deserialization_rule-InsecureDeserialization" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_endpoint_rule-UnvalidatedRedirect" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_injection_rule-CommandInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="csharp_injection_rule-LdapInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_injection_rule-SQLInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_injection_rule-XPathInjection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_injection_rule-XmlDocumentXXEInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_injection_rule-XmlReaderXXEInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_other_rule-UnsafeXSLTSettingUsed" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_password_rule-PasswordComplexity" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_path_rule-PathTraversal" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_validation_rule-InputValidation" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_xss_rule-HtmlElementXss" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="csharp_xss_rule-ScriptXss" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_blocklist_rule-blocklist-des" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_blocklist_rule-blocklist-md5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_blocklist_rule-blocklist-rc4" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_blocklist_rule-blocklist-sha1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_crypto_rule-badtlssettings" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_crypto_rule-insecure-ignore-host-key" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_crypto_rule-tlsversion" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_crypto_rule-weakkeystrength" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_crypto_rule-weakrandsource" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_file-permissions_rule-fileperm" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_file-permissions_rule-mkdir" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_filesystem_rule-decompression-bomb" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_filesystem_rule-fileread" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_filesystem_rule-httprootdir" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_filesystem_rule-poorwritepermissions" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_filesystem_rule-tempfiles" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_filesystem_rule-ziparchive" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_http_rule-http-serve" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_injection_rule-ssrf" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_injection_rule-template-injection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_leak_rule-pprof-endpoint" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="go_memory_rule-integer-overflow" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="go_memory_rule-memoryaliasing" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_network_rule-bind-to-all-interfaces" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_sql_rule-concat-sqli" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_subproc_rule-subproc" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="go_unsafe_rule-unsafe" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript-client-side-request-forgery" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-client-side-url-redirect" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-code-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-array-manipulation" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-dirname" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-execa-library" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-from-command-line-args" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-from-github-actions" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-http" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-other-exec-libraries" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-spawn-shell-option" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-string-concatenation" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-injection-third-party-libraries" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-command-line-argument-command-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-dom-based-xss" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-javascript-tainted-path" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-reflected-xss" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-response-dom-xss" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-second-order-command-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-second-order-command-injection-git-hg" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-server-side-request-forgery" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-server-side-url-redirect" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-stored-xss" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-unsafe-dynamic-method-access" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-unsafe-jquery-plugin" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-unsafe-shell-command-construction" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-xpath-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript-xss-through-dom" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript-zip-slip" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="javascript_buf_rule-buffer-noassert-read" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_buf_rule-buffer-noassert-write" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_buf_rule-detect-new-buffer" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_eval_rule-eval-with-expression" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_random_rule-pseudo-random-bytes" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_react_rule-dangerouslysetinnerhtml" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_require_rule-non-literal-require" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_timing_rule-possible-timing-attacks" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="javascript_xss_rule-mustache-escape" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_assert_rule-assert-used" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_bind-all-interfaces_rule-general-bindall-interfaces" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-cipher-modes" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-cipher-blowfish" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-cipher-des" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-cipher-rc2" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-cipher-rc4" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-cipher-xor" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-encrypt-dsa-rsa" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-encrypt-ec" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-hash-md5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-hash-sha1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-hazmat-cipher-arc4" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-hazmat-cipher-blowfish" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto-hazmat-cipher-idea" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto.hazmat-hash-md5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-crypto.hazmat-hash-sha1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-hash-md2" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-hash-md4" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-hash-md5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-hash-sha1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-hashlib-new-insecure-functions" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_crypto_rule-import-pycrypto" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_deserialization_rule-cpickle" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_deserialization_rule-dill" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_deserialization_rule-marshal" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_deserialization_rule-pickle" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_deserialization_rule-shelve" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_deserialization_rule-yaml-load" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_django_rule-django-extra-used" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_escaping_rule-jinja2-autoescape-false" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_escaping_rule-use-of-mako-templates" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_eval_rule-eval" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-exec-used" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-linux-command-wildcard-injection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-os-path" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-os-popen2" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-start-process-with-no-shell" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-subprocess-call" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-subprocess-popen-shell-true" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_exec_rule-subprocess-shell-TRUE" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_file-permissions_rule-general-bad-permission" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_files_rule-tarfile-unsafe-members" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_flask_rule-app-debug" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_ftp_rule-ftplib" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_log_rule-logging-config-insecure-listen" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_random_rule-random" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_requests_rule-request-without-timeout" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_snmp_rule-insecure-snmp-version" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_snmp_rule-snmp-weak-cryptography" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_sql_rule-hardcoded-sql-expression" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_ssh_rule-ssh-nohost-key-verification" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_ssl_rule-req-no-certvalid" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_ssl_rule-ssl-no-version" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_ssl_rule-ssl-with-bad-version" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_ssl_rule-unverified-context" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_telnet_rule-import-telnib" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_tmpdir_rule-hardcodedtmp" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_tmpdir_rule-mktemp-q" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="python_urlopen_rule-urllib-urlopen" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-celement" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-element" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-etree" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-expatbuilder" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-expatreader" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-minidom" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-pulldom" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="python_xml_rule-sax" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-aes-ecb" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-aes-noiv" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-insecure-random-generator" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-md5" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-sha1" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-timing-attack" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-tls-reject" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_crypto_rule-node-weak-crypto" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-node-knex-sqli-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-node-nosqli-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-node-nosqli-js-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-node-sqli-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-sequelize-tls" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-sequelize-tls-cert-validation" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_database_rule-sequelize-weak-tls" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_electronjs_rule-electron-allow-http" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_electronjs_rule-electron-blink-integration" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_electronjs_rule-electron-context-isolation" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_electronjs_rule-electron-disable-websecurity" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_electronjs_rule-electron-experimental-features" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_electronjs_rule-electron-nodejs-integration" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-eval-nodejs" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-eval-require" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-grpc-insecure-connection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-node-deserialize" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-sandbox-code-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-serializetojs-deserialize" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-server-side-template-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-vm-code-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-vm-compilefunction-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-vm-runincontext-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-vm-runinnewcontext-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-vm2-code-injection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-vm2-context-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_eval_rule-yaml-deserialize" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_exec_rule-shelljs-os-command-exec" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-default" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-no-domain" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-no-httponly" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-no-maxage" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-no-path" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-no-samesite" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-cookie-session-no-secure" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-express-cors" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-generic-cors" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-generic-header-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-header-xss-generic" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-header-xss-lusca" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-helmet-feature-disabled" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_headers_rule-host-header-injection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_jwt_rule-hardcoded-jwt-secret" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_jwt_rule-jwt-exposed-credentials" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_jwt_rule-jwt-exposed-data" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_jwt_rule-jwt-express-hardcoded" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_jwt_rule-jwt-not-revoked" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_jwt_rule-node-jwt-none-algorithm" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_ssrf_rule-node-ssrf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_ssrf_rule-phantom-ssrf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_ssrf_rule-playwright-ssrf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_ssrf_rule-puppeteer-ssrf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_ssrf_rule-wkhtmltoimage-ssrf" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_ssrf_rule-wkhtmltopdf-ssrf" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_traversal_rule-admzip-path-overwrite" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_traversal_rule-express-lfr-warning" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_traversal_rule-join-resolve-path-traversal" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_traversal_rule-tar-path-overwrite" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_traversal_rule-zip-path-overwrite" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xml_rule-node-entity-expansion" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xml_rule-node-xpath-injection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xml_rule-node-xxe" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xml_rule-xxe-expat" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xss_rule-handlebars-noescape" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xss_rule-handlebars-safestring" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xss_rule-squirrelly-autoescape" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xss_rule-xss-disable-mustache-escape" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_javascript_xss_rule-xss-serialize-javascript" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_oc_other_rule-ios-self-signed-ssl" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_oc_other_rule-ios-webview-ignore-ssl" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_swift_other_rule-ios-biometric-acl" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_swift_other_rule-ios-dtls1-used" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_swift_other_rule-ios-file-no-special" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_swift_other_rule-ios-keychain-weak-accessibility-value" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="rules_lgpl_swift_other_rule-ios-tls3-not-used" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-CookieHTTPOnly" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-CookieInsecure" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-CookiePersistent" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-CookieUsage" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-HttpResponseSplitting" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-RequestParamToCookie" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-RequestParamToHeader" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_cookie_rule-TrustBoundaryViolation" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_cors_rule-PermissiveCORS" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_cors_rule-PermissiveCORSInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-BlowfishKeySize" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-CipherDESInsecure" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-CipherDESedeInsecure" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-CipherECBMode" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-CipherIntegrity" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-CipherPaddingOracle" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-CustomMessageDigest" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-DefaultHTTPClient" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-HazelcastSymmetricEncryption" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-InsufficientKeySizeRsa" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-NullCipher" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-RsaNoPadding" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-WeakMessageDigest" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_crypto_rule-WeakTLSProtocol" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_endpoint_rule-JaxRsEndpoint" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_endpoint_rule-JaxWsEndpoint" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_endpoint_rule-UnencryptedSocket" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_endpoint_rule-UnvalidatedRedirect" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_endpoint_rule-WeakHostNameVerification" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_file_rule-FileUploadFileName" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_file_rule-FilenameUtils" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_form_rule-FormValidate" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-AWSQueryInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-BeanPropertyInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-CLRFInjectionLogs" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-CommandInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-CustomInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-CustomInjectionSQLString" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-ELInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-FileDisclosure" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-HttpParameterPollution" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-LDAPInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-OgnlInjection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-PathTraversalIn" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-PathTraversalOut" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-SpotbugsPathTraversalAbsolute" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-SpotbugsPathTraversalRelative" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_inject_rule-SqlInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_ldap_rule-AnonymousLDAP" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_ldap_rule-EntryPoisoning" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_password_rule-ConstantDBPassword" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_password_rule-EmptyDBPassword" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_password_rule-HardcodePassword" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_perm_rule-DangerousPermissions" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_perm_rule-OverlyPermissiveFilePermissionInline" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_perm_rule-OverlyPermissiveFilePermissionObj" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_script_rule-ScriptInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_script_rule-SpelView" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_smtp_rule-InsecureSmtp" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_smtp_rule-SmtpClient" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_ssrf_rule-PlaySSRF" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_ssrf_rule-SSRF" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_strings_rule-BadHexConversion" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_strings_rule-FormatStringManipulation" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_strings_rule-ImproperUnicode" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_strings_rule-ModifyAfterValidation" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_strings_rule-NormalizeAfterValidation" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_templateinjection_rule-TemplateInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_unsafe_rule-ExternalConfigControl" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_unsafe_rule-InformationExposure" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_unsafe_rule-SensitiveDataExposure" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xml_rule-ApacheXmlRpc" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xml_rule-SAMLIgnoreComments" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xml_rule-XmlDecoder" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xml_rule-XsltTransform" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xpathi_rule-XpathInjection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_xss_rule-MVCApi" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xss_rule-RequestWrapper" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xss_rule-WicketXSS" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xss_rule-XSSReqParamToServletWriter" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xss_rule-XSSServlet" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="scala_xxe_rule-Document" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_xxe_rule-SaxParserXXE" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_xxe_rule-Trans" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_xxe_rule-XMLRdr" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_xxe_rule-XMLStreamRdr" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="scala_xxe_rule-XPathXXE" enabled="true" level="ERROR" enabled_by_default="true" />
   </profile>
 </component>

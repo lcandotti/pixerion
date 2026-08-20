@@ -14,7 +14,8 @@ picocli = "4.7.6"
 graalvmNative = "0.10.6"
 ktlint = "14.2.0"
 springBoot = "4.1.0"
-springdoc = "3.0.3"
+springDoc = "3.1.0"
+springDocPlugin = "1.9.0"
 # The Gradle  ↔ npm bridge for the `pixerion-webapp` module (ADR-0013)…
 nodeGradle = "7.1.0"
 # … and the Node.js runtime it downloads to run `npm run build` (current LTS, "Krypton").
@@ -42,6 +43,7 @@ springBootStarterSecurity = { module = "org.springframework.boot:spring-boot-sta
 springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 springBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+springBootDevTools = { module = "org.springframework.boot:spring-boot-devtools" }
 # Boot 4 split autoconfiguration into per-technology modules; Flyway's lives here.
 # Without it, flyway-core is on the classpath but never wired into the lifecycle.
 springBootFlyway = { module = "org.springframework.boot:spring-boot-flyway" }
@@ -51,7 +53,7 @@ postgresql = { module = "org.postgresql:postgresql" }
 h2 = { module = "com.h2database:h2" }
 # OpenAPI generation (/v3/api-docs) + Scalar docs UI (/scalar) for the server (ADR-0012).
 # The 3.x line targets Boot 4 (2.x does not). Not in the Boot BOM, so it needs an explicit version.
-springdocOpenapiStarterWebmvcScalar = { module = "org.springdoc:springdoc-openapi-starter-webmvc-scalar", version.ref = "springdoc" }
+springdocOpenapiStarterWebmvcScalar = { module = "org.springdoc:springdoc-openapi-starter-webmvc-scalar", version.ref = "springDoc" }
 springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
 # Boot 4 moved the MockMvc test slice (@AutoConfigureMockMvc, @WebMvcTest) out of
 # spring-boot-test-autoconfigure into this per-technology module — same split as
@@ -74,5 +76,6 @@ kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", 
 graalvmNative = { id = "org.graalvm.buildtools.native", version.ref = "graalvmNative" }
 # Applied by the Java `:server` front-end (Spring MVC web backend over core). See ADR-0007.
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+springDoc = { id = "org.springdoc.openapi-gradle-plugin", version.ref = "springDocPlugin" }
 # Applied by `:pixerion-webapp` to drive the Angular (npm) build from Gradle. See ADR-0013.
 nodeGradle = { id = "com.github.node-gradle.node", version.ref = "nodeGradle" }
