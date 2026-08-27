@@ -1,5 +1,6 @@
 package io.modernia.pixerion.server.catalog.controllers;
 
+import io.modernia.pixerion.server.catalog.BookNotFoundException;
 import io.modernia.pixerion.server.catalog.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,16 +76,27 @@ public class CatalogController {
      * {@code HandlerMethodValidationException}, which Spring MVC already renders as a 400.
      */
     @GetMapping("/search")
-    @Operation(summary = "Search a source by title",
+    @Operation(
+            summary = "Search a source by title",
             description = "Returns the books whose title matches. An empty array means no matches, not a failure.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Matching books (possibly none)"),
-            @ApiResponse(responseCode = "400", description = "Blank title, or unknown source",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Blank title, or unknown source",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ProblemDetail.class))),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Missing or invalid token",
                     content = @Content),
-            @ApiResponse(responseCode = "502", description = "The source could not be reached or understood",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(
+                    responseCode = "502",
+                    description = "The source could not be reached or understood",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ProblemDetail.class)))
     })
     public List<BookResponse> search(
             @Parameter(description = "Title text to search for", example = "berserk", required = true)
@@ -91,8 +104,7 @@ public class CatalogController {
 
             @Parameter(description = "Catalog source to query", example = DEFAULT_SOURCE)
             @RequestParam(defaultValue = DEFAULT_SOURCE) String source) {
-        // TODO: catalog.searchByTitle(source, title) -> map each Book through BookResponse.from
-        throw new UnsupportedOperationException("TODO: implement search");
+        return catalog.searchByTitle(source, title).stream().map(BookResponse::from).toList();
     }
 
     /**
@@ -110,14 +122,28 @@ public class CatalogController {
     @Operation(summary = "Fetch a book by source id")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "The book"),
-            @ApiResponse(responseCode = "400", description = "Unknown source",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Unknown source",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ProblemDetail.class))),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Missing or invalid token",
                     content = @Content),
-            @ApiResponse(responseCode = "404", description = "No book for that reference",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "502", description = "The source could not be reached or understood",
-                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No book for that reference",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ProblemDetail.class))),
+            @ApiResponse(
+                    responseCode = "502",
+                    description = "The source could not be reached or understood",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ProblemDetail.class)))
     })
     public BookResponse find(
             @Parameter(description = "Catalog source that issued the id", example = DEFAULT_SOURCE)
@@ -125,8 +151,10 @@ public class CatalogController {
 
             @Parameter(description = "Source-native identifier", example = "801513ba-a712-498c-8f57-cae55b38cc92")
             @PathVariable String id) {
-        // TODO: catalog.find(source, id); if null -> raise the 404 (see CatalogExceptionHandler
-        // for how it is rendered), else BookResponse.from(book).
-        throw new UnsupportedOperationException("TODO: implement find");
+        var book = catalog.find(id, source);
+        if (book == null) {
+            throw new BookNotFoundException(source, id);
+        }
+        return BookResponse.from(book);
     }
 }

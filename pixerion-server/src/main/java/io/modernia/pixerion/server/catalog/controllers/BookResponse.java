@@ -48,7 +48,6 @@ public record BookResponse(
      * <p>{@code getTitle()} and {@code getSynopsis()} are ordinary and need no help.
      */
     public static BookResponse from(Book book) {
-        // TODO: new BookResponse(Refs.idOf(book), Refs.render(book.getRef()), book.getTitle(), book.getSynopsis())
-        throw new UnsupportedOperationException("TODO: implement BookResponse.from");
+        return new BookResponse(Refs.idOf(book), Refs.render(book.getRef()),  book.getTitle(), book.getSynopsis());
     }
 }
