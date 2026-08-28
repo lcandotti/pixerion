@@ -1,5 +1,9 @@
 package io.modernia.pixerion.server.auth;
 
+import io.modernia.pixerion.server.auth.models.Role;
+import io.modernia.pixerion.server.auth.models.RoleRepository;
+import io.modernia.pixerion.server.auth.models.User;
+import io.modernia.pixerion.server.auth.models.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

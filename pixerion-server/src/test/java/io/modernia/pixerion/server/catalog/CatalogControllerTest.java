@@ -5,19 +5,24 @@ import io.modernia.pixerion.domain.BookRef;
 import io.modernia.pixerion.domain.Catalog;
 import io.modernia.pixerion.domain.CatalogException;
 import io.modernia.pixerion.domain.DownloadEvent;
+import io.modernia.pixerion.server.catalog.components.CatalogSources;
+import io.modernia.pixerion.server.catalog.components.RegistryCatalogSources;
 import kotlin.coroutines.Continuation;
 import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.flow.FlowKt;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Drives the catalog endpoints against a fake {@link Catalog} — parse → service → render —
@@ -41,25 +46,48 @@ import java.util.Map;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(CatalogControllerTest.FakeSources.class)
 @Disabled("TODO: enable once CatalogController and CatalogService are implemented")
 class CatalogControllerTest {
+
+    /** A scheme no real adapter owns, so nothing here can accidentally reach MangaDex. */
+    static final String FAKE_SCHEME = "fake";
 
     @Autowired
     MockMvc mvc;
 
-    @Autowired
-    CatalogService catalog;
-
     /**
-     * Points the service at a fake source instead of the live registry.
+     * Substitutes the fake for {@link RegistryCatalogSources} across the whole context.
      *
-     * <p>Reassigning the field is safe because {@code CatalogService} caches per scheme —
-     * use a scheme name no real adapter owns, or the cache may already hold a real adapter
-     * from an earlier test in the same context.
+     * <p>A bean, not a field the test reassigns in a {@code @BeforeEach}. Because this
+     * changes the context's bean definitions, Spring caches it as a <em>different</em>
+     * context and builds a fresh {@code CatalogService} for it — so the adapter cache starts
+     * empty and no earlier test can have left a real adapter in it. Nothing needs resetting
+     * between test methods, because nothing here is mutated.
      */
-    @BeforeEach
-    void useFakeSource() {
-        // TODO: catalog.sources = scheme -> "fake".equals(scheme) ? new FakeCatalog(...) : null;
+    @TestConfiguration
+    static class FakeSources {
+
+        @Bean
+        CatalogSources catalogSources() {
+            return new CatalogSources() {
+
+                @Override
+                public Catalog get(String scheme) {
+                    // TODO: return FAKE_SCHEME.equals(scheme) ? new FakeCatalog(...) : null;
+                    //
+                    // null for anything else — that is what drives the 400 case below, and
+                    // it must stay null rather than throw: an unknown source is a caller
+                    // error the service turns into UnknownSourceException, not a failure.
+                    return null;
+                }
+
+                @Override
+                public Set<String> known() {
+                    return Set.of(FAKE_SCHEME);
+                }
+            };
+        }
     }
 
     @Test

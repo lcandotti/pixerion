@@ -1,4 +1,4 @@
-package io.modernia.pixerion.server.catalog;
+package io.modernia.pixerion.server.catalog.exceptions;
 
 import io.modernia.pixerion.source.CatalogRegistry;
 

@@ -60,8 +60,7 @@ public class TokenController {
                     description = "Invalid email / password",
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ProblemDetail.class)))
-    })
+                                    implementation = ProblemDetail.class)))})
     public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest) {
         // Throws BadCredentialsException on a bad password *or* an unknown email —
         // DaoAuthenticationProvider hides UsernameNotFoundException behind it by default

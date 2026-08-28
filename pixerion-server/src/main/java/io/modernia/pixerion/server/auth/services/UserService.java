@@ -1,5 +1,7 @@
-package io.modernia.pixerion.server.auth;
+package io.modernia.pixerion.server.auth.services;
 
+import io.modernia.pixerion.server.auth.models.User;
+import io.modernia.pixerion.server.auth.models.UserRepository;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

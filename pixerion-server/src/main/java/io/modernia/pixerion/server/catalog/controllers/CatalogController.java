@@ -1,7 +1,6 @@
 package io.modernia.pixerion.server.catalog.controllers;
 
-import io.modernia.pixerion.server.catalog.BookNotFoundException;
-import io.modernia.pixerion.server.catalog.CatalogService;
+import io.modernia.pixerion.server.catalog.services.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,8 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +17,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Reads from the catalog sources, for the frontend to render.
@@ -40,12 +41,18 @@ import java.util.List;
  *
  * <p><b>Status codes</b>, mirroring core's absence-vs-failure contract:
  * <ul>
- *   <li>{@code 200} with an empty array — searched fine, nothing matched.</li>
- *   <li>{@code 404} — that reference resolves to no book.</li>
- *   <li>{@code 400} — unknown {@code source}, or a blank {@code title}.</li>
+ *   <li>{@code 200} with an empty array — the lookup ran fine and matched nothing. This is
+ *       the <em>only</em> way absence is reported, whether the caller asked by title or by
+ *       id.</li>
+ *   <li>{@code 400} — unknown {@code source}, or a query naming neither {@code title} nor
+ *       {@code id} (or both).</li>
  *   <li>{@code 502} — the upstream source was unreachable or unintelligible.</li>
  * </ul>
- * The last two are mapped in {@code CatalogExceptionHandler}; the 404 is this class's job.
+ * Note the absent 404. Books are only ever reached through a collection here, and a filter
+ * that matches nothing is a successful empty filter — so the one status that would have to
+ * mean "no such book" has no route to come from. 404 from these paths now means only what it
+ * says at the HTTP level: no such endpoint. The 400 and 502 are mapped in
+ * {@code CatalogExceptionHandler}.
  */
 @RestController
 @RequestMapping("/api/catalog")
@@ -54,7 +61,13 @@ import java.util.List;
 @SecurityRequirement(name = "bearer-jwt")
 public class CatalogController {
 
-    /** Queried when the caller does not name one. Matches the CLI's {@code --source} default. */
+    /**
+     * Shown as the {@code source} example in the generated OpenAPI document. Matches the
+     * CLI's {@code --source} default — but note it is <em>only</em> an example here. The
+     * source is a required path segment, never defaulted: the CLI defaults because a human
+     * is typing, whereas every caller of this API is a frontend that already knows which
+     * source it is displaying, and silently answering from MangaDex would hide the mistake.
+     */
     private static final String DEFAULT_SOURCE = "mangadex";
 
     private final CatalogService catalog;
@@ -64,26 +77,71 @@ public class CatalogController {
     }
 
     /**
-     * {@code GET /api/catalog/search?title=…&source=…} — discovery by title.
+     * {@code GET /api/catalog} — the source names every other route accepts.
      *
-     * <p>Note that no-matches is a 200 with {@code []}, not a 404. An empty result is a
-     * successful search that found nothing, and the frontend renders "no results" from it;
-     * a 404 would say the <em>endpoint</em> does not exist.
+     * <p>This is the discovery route for the whole controller: {@code source} is a required
+     * segment of every other path here, and a client has no other way to learn which values
+     * are legal. The frontend populates its source picker
+     * from here rather than hard-coding {@code "mangadex"}, so registering an adapter in
+     * {@code CatalogRegistry} is enough to surface it in the UI — the same promise the CLI
+     * keeps by rendering its "known:" hint from the registry.
      *
-     * <p>{@code @NotBlank} is enforced because the class carries {@code @Validated} —
-     * without it, constraints on method parameters are ignored entirely and a blank title
-     * would sail through to the source. The violation surfaces as
-     * {@code HandlerMethodValidationException}, which Spring MVC already renders as a 400.
+     * <p>A {@link Set}, not a {@code List}: the schemes are a key set with no meaningful
+     * order, and nothing downstream may depend on the order they come back in.
+     *
+     * <p>Always a 200, never a 404 — an empty set would mean "no sources are registered",
+     * which is a coherent answer, not a missing resource. There is no 400 either: the route
+     * takes no input to get wrong.
      */
-    @GetMapping("/search")
+    @GetMapping
     @Operation(
-            summary = "Search a source by title",
-            description = "Returns the books whose title matches. An empty array means no matches, not a failure.")
+            summary = "Get a set of all the available catalogs",
+            description = "Returns the all the catalogs source to be used for all the other endpoints")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "All catalogs")})
+    public Set<String> list() {
+        return catalog.all();
+    }
+
+    /**
+     * {@code GET /api/catalog/{source}/books?title=…} or {@code ?id=…} — the books of one
+     * source, filtered.
+     *
+     * <p><b>One route, two filters, by design.</b> Looking a book up by id used to be a
+     * separate {@code /{source}/{id}} route returning a bare object and 404-ing on a miss.
+     * Folding it in here makes id just another way to narrow the same collection, which buys
+     * one uniform answer shape: a JSON array, always, and an empty one whenever nothing
+     * matched. The frontend renders "no results" from {@code []} without caring which filter
+     * produced it, and never has to branch on a status code to tell absence from failure.
+     *
+     * <p>The cost, stated plainly: a caller can no longer distinguish "this id does not
+     * exist" from "this id exists but the filter returned nothing" — because with an id
+     * filter those are the same statement. If a 404 for a known-missing book is ever needed
+     * (a deep link that should 404 rather than render an empty page, say), that is the
+     * reason to bring a dedicated {@code /books/{id}} route back, and {@code /books} is
+     * named so it can be added underneath without disturbing this one.
+     *
+     * <p><b>Exactly one filter.</b> Neither given is a caller who forgot to say what they
+     * want; both given is a caller with two ideas about what they want, and picking one
+     * silently would hide the bug. Both are 400. This is checked here rather than with
+     * {@code @NotBlank}, because a bean constraint can require a single parameter but cannot
+     * express a rule <em>between</em> two of them.
+     *
+     * <p>{@code source} is a path segment, matching {@code /{source}/…} everywhere else in
+     * this controller: it names <em>which catalog</em> is being read, which is structure, not
+     * a filter over results. {@code title} and {@code id} narrow what comes back, so they are
+     * query parameters. A miss on the source itself is still a 400 (unknown source), never an
+     * empty array — that is a bad request, not a search that found nothing.
+     */
+    @GetMapping("/{source}")
+    @Operation(
+            summary = "List a source's books, filtered by title or id",
+            description = "Give exactly one of title or id. An empty array means no matches, not a failure.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Matching books (possibly none)"),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Blank title, or unknown source",
+                    description = "Unknown source, or not exactly one of title and id",
                     content = @Content(
                             schema = @Schema(
                                     implementation = ProblemDetail.class))),
@@ -96,65 +154,36 @@ public class CatalogController {
                     description = "The source could not be reached or understood",
                     content = @Content(
                             schema = @Schema(
-                                    implementation = ProblemDetail.class)))
-    })
-    public List<BookResponse> search(
-            @Parameter(description = "Title text to search for", example = "berserk", required = true)
-            @RequestParam @NotBlank String title,
-
-            @Parameter(description = "Catalog source to query", example = DEFAULT_SOURCE)
-            @RequestParam(defaultValue = DEFAULT_SOURCE) String source) {
-        return catalog.searchByTitle(source, title).stream().map(BookResponse::from).toList();
-    }
-
-    /**
-     * {@code GET /api/catalog/{source}/{id}} — fetch one book by its source-native id.
-     *
-     * <p>The source is a path segment rather than the {@code "scheme:id"} string the CLI
-     * accepts: a colon inside a path segment is legal but needs escaping by every client,
-     * and two segments keep the route readable and unambiguous.
-     *
-     * <p>A miss must become a 404 here. {@code CatalogService.find} returns {@code null} for
-     * "no such book" — returning that straight out would serialize as a 200 with an empty
-     * body, which reads to the frontend as "found, but blank".
-     */
-    @GetMapping("/{source}/{id}")
-    @Operation(summary = "Fetch a book by source id")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "The book"),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Unknown source",
-                    content = @Content(
-                            schema = @Schema(
-                                    implementation = ProblemDetail.class))),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Missing or invalid token",
-                    content = @Content),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "No book for that reference",
-                    content = @Content(
-                            schema = @Schema(
-                                    implementation = ProblemDetail.class))),
-            @ApiResponse(
-                    responseCode = "502",
-                    description = "The source could not be reached or understood",
-                    content = @Content(
-                            schema = @Schema(
-                                    implementation = ProblemDetail.class)))
-    })
-    public BookResponse find(
-            @Parameter(description = "Catalog source that issued the id", example = DEFAULT_SOURCE)
+                                    implementation = ProblemDetail.class)))})
+    public List<BookResponse> books(
+            @Parameter(description = "Catalog source to read", example = DEFAULT_SOURCE)
             @PathVariable String source,
 
-            @Parameter(description = "Source-native identifier", example = "801513ba-a712-498c-8f57-cae55b38cc92")
-            @PathVariable String id) {
-        var book = catalog.find(id, source);
-        if (book == null) {
-            throw new BookNotFoundException(source, id);
+            @Parameter(description = "Title text to match. Mutually exclusive with id.", example = "berserk")
+            @RequestParam(required = false) String title,
+
+            @Parameter(
+                    description = "Source-native identifier. Mutually exclusive with title.",
+                    example = "801513ba-a712-498c-8f57-cae55b38cc92")
+            @RequestParam(required = false) String id) {
+
+        // hasText, not != null: "?title=" is a present-but-empty parameter, and forwarding a
+        // blank query to the source would ask it for everything it has.
+        var byId = StringUtils.hasText(id);
+        var byTitle = StringUtils.hasText(title);
+
+        // Equal means both or neither — the two ways of failing to name exactly one filter.
+        if (byId == byTitle) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Provide exactly one of \"title\" or \"id\".");
         }
-        return BookResponse.from(book);
+
+        if (byId) {
+            // null is core's "no such book", which becomes [] rather than a 404: see above.
+            var book = catalog.find(source, id);
+            return book == null ? List.of() : List.of(BookResponse.from(book));
+        }
+
+        return catalog.searchByTitle(source, title).stream().map(BookResponse::from).toList();
     }
 }

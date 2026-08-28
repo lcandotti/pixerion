@@ -1,16 +1,19 @@
-package io.modernia.pixerion.server.catalog;
+package io.modernia.pixerion.server.catalog.services;
 
 import io.modernia.pixerion.domain.Book;
-import io.modernia.pixerion.domain.Catalog;
 import io.modernia.pixerion.domain.CatalogException;
+import io.modernia.pixerion.domain.SourceRef;
 import io.modernia.pixerion.interop.BlockingCatalog;
+import io.modernia.pixerion.server.catalog.components.CatalogSources;
+import io.modernia.pixerion.server.catalog.components.RegistryCatalogSources;
+import io.modernia.pixerion.server.catalog.exceptions.UnknownSourceException;
 import io.modernia.pixerion.source.CatalogRegistry;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * The server's read-only door onto {@code core}'s catalog sources.
@@ -52,21 +55,43 @@ public class CatalogService {
     private final Map<String, BlockingCatalog> catalogs = new ConcurrentHashMap<>();
 
     /**
-     * Resolves a source name to a {@link Catalog}. Defaults to the shared registry in
-     * {@code core}; tests replace it with a fake so an endpoint can be driven end to end
-     * without touching the network.
+     * Where sources come from — {@link RegistryCatalogSources} in production, a fake in
+     * tests. {@link CatalogSources} explains why the indirection exists at all.
      *
-     * <p>This seam is why the class is testable at all. {@link CatalogRegistry} is a Kotlin
-     * {@code object} with a fixed table and no runtime registration — there is nothing to
-     * stub — so calling it directly would leave {@code @WebMvcTest} no choice but to hit
-     * the live MangaDex API. The CLI keeps the same escape hatch in {@code CatalogCommand}
-     * for the same reason.
-     *
-     * <p>Package-private and mutable rather than a constructor parameter: two constructors
-     * would leave Spring guessing which one to autowire, and a single one would force every
-     * caller to pass the default in.
+     * <p>Injected and {@code final}, rather than a package-private field a test reassigns
+     * after construction. Two reasons. This bean is a singleton shared by every request
+     * thread, and a final field set in the constructor is safely published where a mutable
+     * one is not. And a test that substitutes a <em>bean</em> instead of a field gets its own
+     * application context — so its own {@code CatalogService}, with an empty
+     * {@link #catalogs} cache — where mutating one shared instance in a {@code @BeforeEach}
+     * leaves whatever earlier tests cached sitting underneath it.
      */
-    Function<String, Catalog> sources = CatalogRegistry::get;
+    private final CatalogSources sources;
+
+    public CatalogService(CatalogSources sources) {
+        this.sources = sources;
+    }
+
+    /**
+     * The names of every catalog source this server can query.
+     *
+     * <p>The <em>registered</em> schemes, straight from {@link CatalogSources}, and pointedly
+     * not {@code catalogs.keySet()}. That distinction is the whole trap here: {@link #catalogs}
+     * is a lazily-filled cache, so reading its key set would answer "sources somebody has hit
+     * since the last restart" — empty on a cold boot, growing as traffic arrives. A discovery
+     * route that returns nothing until the caller already knew what to ask for is useless to
+     * the frontend.
+     *
+     * <p>No I/O and no failure mode: the table behind {@link CatalogSources} is fixed at
+     * class-init time, so this never reaches a source, never builds an adapter, and never
+     * throws {@link CatalogException}.
+     *
+     * @return the registered scheme names, e.g. {@code ["mangadex"]}. Never {@code null};
+     *         empty only if no adapter is registered at all.
+     */
+    public Set<String> all() {
+        return sources.known();
+    }
 
     /**
      * Searches one source by title.
@@ -100,12 +125,7 @@ public class CatalogService {
      * @throws CatalogException       if the source could not be reached or understood.
      */
     public Book find(String source, String id) {
-        // TODO: catalogFor(source).find(new SourceRef(source, id))
-        //
-        // A SourceRef, not a BookId: the id came in scoped to a source, and minting a
-        // portable BookId from it would claim a cross-source identity nothing established.
-        // The CLI's parseRef() makes the same choice for a bare token.
-        throw new UnsupportedOperationException("TODO: implement find");
+        return catalogFor(source).find(new SourceRef(source, id));
     }
 
     /**
@@ -117,13 +137,10 @@ public class CatalogService {
      *         two map to different statuses.
      */
     private BlockingCatalog catalogFor(String source) {
-        // TODO: computeIfAbsent(source, ...) over sources.apply(scheme), wrapping the
-        // returned Catalog in a new BlockingCatalog; throw UnknownSourceException when the
-        // resolver returns null.
-        //
-        // Careful: computeIfAbsent's mapping function must not return null (that would just
-        // mean "absent" and re-run on every request, so the unknown-source case would never
-        // surface). Check the registry first, or throw from inside the mapping function.
-        throw new UnsupportedOperationException("TODO: implement catalogFor");
+        var catalog = sources.get(source);
+        if  (catalog == null) {
+            throw new UnknownSourceException(source);
+        }
+        return new BlockingCatalog(catalog);
     }
 }

@@ -1,4 +1,4 @@
-package io.modernia.pixerion.server.auth;
+package io.modernia.pixerion.server.auth.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;

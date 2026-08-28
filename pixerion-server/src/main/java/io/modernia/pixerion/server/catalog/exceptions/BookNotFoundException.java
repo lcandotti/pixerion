@@ -1,4 +1,4 @@
-package io.modernia.pixerion.server.catalog;
+package io.modernia.pixerion.server.catalog.exceptions;
 
 /**
  * Raised when a reference resolves to no book.

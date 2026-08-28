@@ -1,8 +1,8 @@
 package io.modernia.pixerion.server.catalog.controllers;
 
 import io.modernia.pixerion.domain.CatalogException;
-import io.modernia.pixerion.server.catalog.BookNotFoundException;
-import io.modernia.pixerion.server.catalog.UnknownSourceException;
+import io.modernia.pixerion.server.catalog.exceptions.BookNotFoundException;
+import io.modernia.pixerion.server.catalog.exceptions.UnknownSourceException;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
