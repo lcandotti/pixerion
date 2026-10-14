@@ -104,14 +104,17 @@ that the build already handles — see
 
 ## Web backend & frontend
 
-The `pixerion-server` module is a bare Spring Boot (Spring MVC) skeleton — its
-web API is being built by hand and is not documented here yet.
+The `pixerion-server` module is a Spring Boot (Spring MVC) backend being built by
+hand: stateless JWT login (`POST /api/auth/login`) and a read-only catalog API
+under `/api/catalog` (in progress), with an interactive console at `/scalar`. See
+[`docs/architecture/server.md`](docs/architecture/server.md).
 
 ```sh
+# for development: run only the database in Docker and the backend on the host
+docker compose up -d postgres               # Postgres published on host port 4433
+./gradlew :pixerion-server:bootRun          # port 8080; defaults point at localhost:4433
+# or the packaged artifact (needs a .env — see docs/operations.md)
 docker compose up --build                   # backend + PostgreSQL together (port 8080)
-# or, for development: run only the database in Docker and the backend on the host
-docker compose up postgres
-./gradlew :pixerion-server:bootRun          # port 8080; defaults point at localhost:5432
 ```
 
 The `pixerion-webapp` module holds the Angular SPA and its Gradle↔npm bridge:
@@ -140,8 +143,14 @@ recorded as ADRs in [`docs/adr/`](docs/adr/).
 |--------|-------------|
 | `core` | Domain model, the `Catalog` contract, source adapters, the downloader, the cbz bundler, and the Java-interop facade. Coroutine-first. Published as `io.modernia.pixerion:pixerion-core`. |
 | `cli` | The picocli CLI. Wires commands to catalogs; ships as a native executable. Not published. |
-| `server` | A Java Spring Boot web front-end skeleton over `core` (via its blocking interop facade) — being built by hand, currently just the application bootstrap. Not published. |
+| `server` | A Java Spring Boot web front-end over `core` (via its blocking interop facade) — being built by hand: JWT auth, a read-only catalog API (in progress), the embedded SPA. Not published. |
 | `webapp` | The Angular SPA plus its Gradle↔npm bridge; `npm run build` output is packaged into a jar embedded into the backend's bootJar. Not published. |
+
+## Documentation
+
+The full developer documentation — getting started, per-module architecture,
+workflows, operations, troubleshooting, and a glossary — starts at
+**[`docs/index.md`](docs/index.md)**.
 
 ## Contributing
 

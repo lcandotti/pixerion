@@ -39,7 +39,8 @@ Gradle build with a strict, one-directional dependency graph:
   as a GraalVM native binary. Not published.
 - **`server`** — thin **Java** Spring Boot (Spring MVC) web front-end over `core`
   (through the blocking interop facade). Being built by hand; so far the
-  application bootstrap plus the auth seam (§4.8). No catalog endpoints yet.
+  application bootstrap, the auth seam (§4.8), and a read-only catalog API
+  (`/api/catalog`, partly stubbed — see `docs/architecture/server.md`).
   Not published.
 - **`webapp`** — the Angular SPA, packaged by Gradle into a jar of static resources
   embedded into the backend's bootJar. No JVM code; it never touches `core`.
@@ -271,15 +272,17 @@ note [docs/design/download-pipeline.md](docs/design/download-pipeline.md).
 - **One artifact serves UI + API.** The `pixerion-webapp` jar carries the compiled
   Angular bundle under `META-INF/resources/` (a Spring Boot classpath
   static-resource root), embedded into the backend's bootJar.
-- **npm never runs for JVM tests.** The backend consumes the webapp jar through a
-  dedicated `webapp` Gradle configuration wired into `bootJar`/`bootRun` **only** —
-  deliberately not `implementation` — so `:pixerion-server:test` has no frontend on
-  its classpath and never triggers a Node/npm build. Don't "simplify" it into a
-  normal dependency.
+- **npm never runs for the server's tests.** The backend consumes the webapp jar
+  through a dedicated `webapp` Gradle configuration wired into `bootJar`/`bootRun`
+  **only** — deliberately not `implementation` — so `:pixerion-server:test` has no
+  frontend on its classpath and never triggers a Node/npm build. Don't "simplify" it
+  into a normal dependency. (A root-level `./gradlew test` still builds the bundle,
+  via `:pixerion-webapp:test` → `processResources` → `npmBuild`.)
 - **The webapp module is inert until scaffolded.** Its npm tasks skip while
-  `pixerion-webapp/package.json` doesn't exist. The Angular app is created with
-  `ng new pixerion-webapp --directory . --skip-git` in that directory (the project
-  name is load-bearing: Gradle packages `dist/pixerion-webapp/browser`). Node itself
+  `pixerion-webapp/package.json` doesn't exist. The Angular app (now scaffolded,
+  Angular 22) was created with `ng new pixerion-webapp --directory . --skip-git` in
+  that directory (the project name is load-bearing: Gradle packages
+  `dist/pixerion-webapp/browser`). Node itself
   is pinned in the version catalog and auto-downloaded by the `node-gradle` plugin.
 - **Frontend dev loop doesn't build jars**: `./gradlew :pixerion-webapp:run` (or a
   plain `ng serve --proxy-config proxy.conf.json`) starts the hot-reloading dev
@@ -386,7 +389,7 @@ server *and* its own resource server, signing with a symmetric HS256 secret
 | Bundler | `pixerion-core/.../bundle/Bundler.kt` |
 | Java interop seam | `pixerion-core/.../interop/` (`BlockingCatalog`, `Refs`) |
 | Source registry (all front-ends) | `pixerion-core/.../source/CatalogRegistry.kt` |
-| Web backend bootstrap | `pixerion-server/.../Application.java` (skeleton, built by hand) |
+| Web backend | `pixerion-server/.../server/` (`auth/`, `catalog/`, `config/`; built by hand) |
 | Angular app + npm bridge | `pixerion-webapp/` (`build.gradle.kts`, `proxy.conf.json`) |
 | Shared build logic | `buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts` |
 | Dependencies (version catalog) | `gradle/libs.versions.toml` |

@@ -257,3 +257,7 @@ rate limiter shapes *transport politeness* (requests per second). They compose: 
 with 4 concurrent writers each calling `bytes()`, the OkHttp limiter paces the actual
 image requests to 5/s. See [ARCHITECTURE.md §4.3–4.4](../../ARCHITECTURE.md) for the
 transport detail.
+
+---
+
+Part of the [Pixerion documentation](../index.md) · see also [Core library](../architecture/core.md#downloader-and-layout).

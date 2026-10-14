@@ -13,11 +13,10 @@ The module is a deliberate work-in-progress, so the set is small: `GET /`,
 follow it, and negative requests asserting that `/api/**` and `/actuator` are
 refused without a token. Grow it as you add endpoints.
 
-> **Open question the file pins:** `/v3/api-docs` and `/scalar` match no rule in
-> `SecurityConfig` and so fall through to the terminal `denyAll()` — 401 without a
-> token, 403 with one. The Scalar console is therefore unusable, since a browser
-> cannot attach a bearer header. Two requests assert that 401 today; the comment
-> above them has the one-line fix if you decide the docs should be public.
+> **Stale requests:** `SecurityConfig` now permits `GET /v3/api-docs` and
+> `GET /scalar` publicly, but the two `[negative]` requests for them in `api.http`
+> still assert a 401 — they fail until updated. The file also has no requests
+> for the `/api/catalog` endpoints yet.
 
 ## Prerequisites
 
@@ -27,15 +26,9 @@ startup and the app **fails to boot** without one. Flyway creates and seeds the
 schema on first start, so an empty database is fine; no manual DDL is needed.
 
 ```sh
-docker run -d --rm --name pixerion-pg -p 5432:5432 \
-  -e POSTGRES_DB=pixerion -e POSTGRES_USER=pixerion -e POSTGRES_PASSWORD=pixerion \
-  postgres:17
+docker compose up -d postgres          # published on host port 4433, the app's default
 ./gradlew :pixerion-server:bootRun
 ```
-
-> The compose `postgres` service does **not** publish a host port, so
-> `docker compose up postgres` + `bootRun` cannot connect — hence the plain
-> `docker run` above. See the note in [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
 Wait until `GET http://localhost:8080/actuator/health` reports `{"status":"UP"}`
 (the first request in `api.http` does exactly that).
